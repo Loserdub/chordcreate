@@ -51,7 +51,10 @@ export const CHORD_LIBRARY: ChordMap = {
 
 export const AVAILABLE_CHORDS = Object.keys(CHORD_LIBRARY).sort();
 
-export const DEFAULT_PROGRESSION = ["C Maj", "A Min", "F Maj", "G Maj"];
+export const DEFAULT_PROGRESSION = [
+  "C Maj", "A Min", "F Maj", "G Maj",
+  "E Min", "A Min", "D Min", "G 7"
+];
 
 export const getChordDescription = (name: string): string => {
   if (name.includes("Maj7")) return "Dreamy, nostalgic, jazz color";

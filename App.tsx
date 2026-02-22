@@ -2,26 +2,29 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { ChordSlot } from './components/ChordSlot';
 import { PianoKeyboard } from './components/PianoKeyboard';
 import { audioService } from './services/audioService';
-import { generateProgression } from './services/geminiService';
-import { DEFAULT_PROGRESSION, AVAILABLE_CHORDS } from './constants';
-import { Play, Square, Wand2, Loader2, RefreshCw, VolumeX, Download } from 'lucide-react';
+import { DEFAULT_PROGRESSION } from './constants';
+import { Play, Square, Download } from 'lucide-react';
 import * as Tone from 'tone';
 import { Midi } from '@tonejs/midi';
 
+type PlaybackMode = 'ALL' | 'ROW1' | 'ROW2' | null;
+
 const App: React.FC = () => {
-  const [progression, setProgression] = useState<string[]>(DEFAULT_PROGRESSION);
+  // Ensure we have 8 chords
+  const [progression, setProgression] = useState<string[]>(() => {
+    if (DEFAULT_PROGRESSION.length < 8) {
+      return [...DEFAULT_PROGRESSION, ...DEFAULT_PROGRESSION].slice(0, 8);
+    }
+    return DEFAULT_PROGRESSION;
+  });
+  
   const [playingIndex, setPlayingIndex] = useState<number | null>(null);
-  const [isPlayingAll, setIsPlayingAll] = useState(false);
+  const [playbackMode, setPlaybackMode] = useState<PlaybackMode>(null);
   const [bpm, setBpm] = useState(90);
   
-  // AI State
-  const [prompt, setPrompt] = useState("");
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [aiError, setAiError] = useState<string | null>(null);
-
   // Refs for transport loop and timeouts
   const stepRef = useRef<number>(0);
-  const playAllLoopRef = useRef<Tone.Loop | null>(null);
+  const loopRef = useRef<Tone.Loop | null>(null);
   const playbackTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const handleChordChange = (index: number, newChord: string) => {
@@ -33,14 +36,18 @@ const App: React.FC = () => {
     setProgression(newProgression);
     
     // Play preview on change (short)
-    audioService.playChord(newChord, "4n");
+    audioService.playChord(newChord, "8n");
   };
 
   const playSingleChord = async (index: number) => {
-    // Stop previous sound immediately to prevent mud
-    audioService.stop();
+    // Stop playback if running
+    if (playbackMode) {
+        stopAll();
+    } else {
+        audioService.stop();
+    }
     
-    // Clear any existing timeout to reset the visual highlight timer
+    // Clear any existing timeout
     if (playbackTimeoutRef.current) {
         clearTimeout(playbackTimeoutRef.current);
         playbackTimeoutRef.current = null;
@@ -48,24 +55,24 @@ const App: React.FC = () => {
 
     setPlayingIndex(index);
     
-    // Play the chord for a duration shortened by ~25% (dotted half note instead of whole note)
-    await audioService.playChord(progression[index], "2n.");
+    // Play chord for quarter note
+    await audioService.playChord(progression[index], "4n");
     
-    // Schedule the visual highlight to turn off after the sound decays
+    // Visual highlight off after 500ms
     playbackTimeoutRef.current = setTimeout(() => {
         setPlayingIndex(null);
-    }, 1500); 
+    }, 500); 
   };
 
   const stopAll = useCallback(() => {
     Tone.Transport.stop();
-    Tone.Transport.cancel(); // Clear scheduled events
-    if (playAllLoopRef.current) {
-        playAllLoopRef.current.dispose();
-        playAllLoopRef.current = null;
+    Tone.Transport.cancel();
+    if (loopRef.current) {
+        loopRef.current.dispose();
+        loopRef.current = null;
     }
-    audioService.stop(); // Stop any ringing notes (releases envelopes)
-    setIsPlayingAll(false);
+    audioService.stop();
+    setPlaybackMode(null);
     setPlayingIndex(null);
     stepRef.current = 0;
     
@@ -74,81 +81,77 @@ const App: React.FC = () => {
     }
   }, []);
 
-  const togglePlayAll = async () => {
-    if (isPlayingAll) {
+  const togglePlayback = async (mode: PlaybackMode) => {
+    if (!mode) return;
+
+    if (playbackMode === mode) {
       stopAll();
       return;
     }
 
+    // Stop existing playback if switching modes
+    stopAll();
+
     // Ensure audio context is ready
-    await audioService.playNote("C0", "32n"); // Dummy trigger to wake audio
+    await audioService.playNote("C0", "32n"); 
     await Tone.start();
 
-    setIsPlayingAll(true);
+    setPlaybackMode(mode);
     Tone.Transport.bpm.value = bpm;
     stepRef.current = 0;
 
-    // Schedule the loop
+    let startIndex = 0;
+    let steps = 4;
+    
+    if (mode === 'ALL') {
+        startIndex = 0;
+        steps = 8;
+    } else if (mode === 'ROW1') {
+        startIndex = 0;
+        steps = 4;
+    } else if (mode === 'ROW2') {
+        startIndex = 4;
+        steps = 4;
+    }
+
+    // Loop interval is quarter note (one beat) per chord
     const loop = new Tone.Loop((time) => {
-      const currentStep = stepRef.current % 4;
+      const step = stepRef.current % steps;
+      const actualIndex = startIndex + step;
       
-      // Update visual state (using Tone.Draw to sync with audio thread)
       Tone.Draw.schedule(() => {
-        setPlayingIndex(currentStep);
+        setPlayingIndex(actualIndex);
       }, time);
 
-      const chord = progression[currentStep];
-      // Play for dotted half note (75% of measure), leaving 25% space
-      audioService.playChord(chord, "2n.");
+      const chord = progression[actualIndex];
+      // Play for a full beat (quarter note)
+      audioService.playChord(chord, "4n");
 
       stepRef.current++;
-    }, "1m").start(0);
+    }, "4n").start(0);
 
-    playAllLoopRef.current = loop;
+    loopRef.current = loop;
     Tone.Transport.start();
   };
 
-  const handleAiGenerate = async () => {
-    if (!prompt.trim()) return;
-    
-    setIsGenerating(true);
-    setAiError(null);
-    try {
-      const chords = await generateProgression(prompt);
-      setProgression(chords);
-      // Optional: Play the first chord to announce success
-      audioService.stop();
-      audioService.playChord(chords[0], "2n");
-    } catch (err) {
-      setAiError("Failed to generate. Try a different mood.");
-    } finally {
-      setIsGenerating(false);
-    }
-  };
-
-  const handleRandomize = () => {
-    const randomChords = Array(4).fill(null).map(() => 
-        AVAILABLE_CHORDS[Math.floor(Math.random() * AVAILABLE_CHORDS.length)]
-    );
-    setProgression(randomChords);
-  };
-
-  const handleExportMidi = () => {
+  const exportMidi = (startIndex: number, count: number, filename: string) => {
     const midi = new Midi();
     const track = midi.addTrack();
     midi.header.setTempo(bpm);
 
-    progression.forEach((chordName, index) => {
+    const slice = progression.slice(startIndex, startIndex + count);
+
+    slice.forEach((chordName, i) => {
       const notes = audioService.getNotesForChord(chordName);
-      // Each chord lasts 1 bar
-      const startTime = index * (60 / bpm * 4); // seconds
-      const duration = (60 / bpm * 4); // seconds - full bar duration
+      // 1 chord = 1 beat
+      const beatDuration = 60 / bpm;
+      const startTime = i * beatDuration;
 
       notes.forEach((note) => {
         track.addNote({
           name: note,
           time: startTime,
-          duration: duration,
+          duration: beatDuration,
           velocity: 0.75
         });
       });
@@ -158,55 +161,103 @@ const App: React.FC = () => {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'chord-progression.mid';
+    a.download = filename;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
   };
 
-  // Cleanup on unmount
+  // Cleanup
   useEffect(() => {
     return () => {
         stopAll();
     };
   }, [stopAll]);
 
-  // Update BPM live
   useEffect(() => {
     Tone.Transport.bpm.value = bpm;
   }, [bpm]);
+
+  const renderRow = (rowId: number, startIndex: number) => (
+    <div className="flex flex-col md:flex-row gap-4 items-stretch bg-neutral-900/20 p-4 rounded-2xl border border-neutral-800/50">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 flex-grow">
+            {progression.slice(startIndex, startIndex + 4).map((chord, i) => {
+                const globalIndex = startIndex + i;
+                return (
+                    <ChordSlot
+                        key={globalIndex}
+                        id={globalIndex}
+                        selectedChord={chord}
+                        isActive={playingIndex === globalIndex}
+                        onSelect={(c) => handleChordChange(globalIndex, c)}
+                        onPlay={() => playSingleChord(globalIndex)}
+                        isPlaying={playingIndex === globalIndex}
+                    />
+                );
+            })}
+        </div>
+        
+        {/* Row Controls Sidebar */}
+        <div className="flex flex-row md:flex-col justify-center gap-3 min-w-[140px] bg-neutral-900 p-4 rounded-xl border border-neutral-800">
+             <div className="text-xs font-bold text-neutral-500 uppercase tracking-widest text-center mb-1">
+                 Row {rowId}
+             </div>
+             
+             <button
+                onClick={() => togglePlayback(rowId === 1 ? 'ROW1' : 'ROW2')}
+                className={`
+                    flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-bold transition-all
+                    ${(rowId === 1 && playbackMode === 'ROW1') || (rowId === 2 && playbackMode === 'ROW2')
+                        ? 'bg-red-900/80 text-red-100 hover:bg-red-800' 
+                        : 'bg-neutral-800 text-neutral-300 hover:bg-neutral-700 hover:text-white'
+                    }
+                `}
+             >
+                {(rowId === 1 && playbackMode === 'ROW1') || (rowId === 2 && playbackMode === 'ROW2') ? (
+                    <><Square size={16} fill="currentColor"/> Stop</>
+                ) : (
+                    <><Play size={16} fill="currentColor"/> Play</>
+                )}
+             </button>
+
+             <button
+                onClick={() => exportMidi(startIndex, 4, `row-${rowId}.mid`)}
+                className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-neutral-950 hover:bg-neutral-800 text-neutral-400 hover:text-orange-500 rounded-lg border border-neutral-800 transition-colors font-semibold text-xs"
+             >
+                <Download size={16} />
+                MIDI
+             </button>
+        </div>
+    </div>
+  );
 
   return (
     <div className="min-h-screen bg-neutral-950 text-neutral-200 flex flex-col items-center py-10 px-4 font-sans">
       
       {/* Header */}
-      <div className="w-full max-w-5xl mb-8 flex flex-col md:flex-row justify-between items-center gap-6">
-        <div className="flex-1">
+      <div className="w-full max-w-6xl mb-8 flex flex-col md:flex-row justify-between items-center gap-6">
+        <div className="flex-1 text-center md:text-left">
             <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-orange-500 to-neutral-200">
             ChordFlow AI
             </h1>
-            <p className="text-neutral-500 mt-2">Intelligent Chord Arranger & Sequencer</p>
+            <p className="text-neutral-500 mt-2">8-Step Sequence Arranger</p>
         </div>
 
-        {/* Export Midi Button (Center-ish) */}
-        <div className="flex-shrink-0">
+        {/* Global Controls */}
+        <div className="flex flex-wrap justify-center gap-4 bg-neutral-900 p-3 rounded-xl border border-neutral-800 shadow-xl">
              <button
-                onClick={handleExportMidi}
+                onClick={() => exportMidi(0, 8, 'full-progression.mid')}
                 className="flex items-center gap-2 px-4 py-2 bg-neutral-800 hover:bg-neutral-700 text-neutral-300 rounded-lg border border-neutral-700 transition-colors font-semibold text-sm shadow-sm"
              >
                 <Download size={16} className="text-orange-500" />
-                Export MIDI
+                Export Full MIDI
              </button>
-        </div>
-        
-        {/* BPM & Main Controls */}
-        <div className="flex-1 flex justify-end">
-            <div className="flex items-center gap-4 bg-neutral-900 p-3 rounded-xl border border-neutral-800 shadow-xl">
-                <div className="flex flex-col items-center mr-2">
-                    <span className="text-[10px] font-bold text-neutral-500 uppercase">BPM</span>
-                    <span className="text-xl font-mono text-orange-500">{bpm}</span>
-                </div>
+
+            <div className="w-[1px] h-8 bg-neutral-800 hidden md:block"></div>
+
+            <div className="flex items-center gap-3">
+                <span className="text-xs font-bold text-neutral-500 uppercase">BPM</span>
                 <input 
                     type="range" 
                     min="60" 
@@ -215,55 +266,45 @@ const App: React.FC = () => {
                     onChange={(e) => setBpm(Number(e.target.value))}
                     className="w-24 accent-orange-600 h-1 bg-neutral-800 rounded-lg appearance-none cursor-pointer"
                 />
-                <div className="w-[1px] h-8 bg-neutral-800 mx-2"></div>
-                <button
-                    onClick={togglePlayAll}
-                    className={`
-                        flex items-center gap-2 px-6 py-3 rounded-lg font-bold transition-all shadow-lg
-                        ${isPlayingAll 
-                            ? 'bg-red-900 hover:bg-red-800 text-red-100 shadow-red-900/20' 
-                            : 'bg-orange-600 hover:bg-orange-500 text-white shadow-orange-600/20'
-                        }
-                    `}
-                >
-                    {isPlayingAll ? (
-                        <>
-                            <Square size={18} fill="currentColor" /> Stop
-                        </>
-                    ) : (
-                        <>
-                            <Play size={18} fill="currentColor" /> Play All
-                        </>
-                    )}
-                </button>
+                <span className="text-sm font-mono text-orange-500 w-8">{bpm}</span>
             </div>
+
+            <div className="w-[1px] h-8 bg-neutral-800 hidden md:block"></div>
+
+            <button
+                onClick={() => togglePlayback('ALL')}
+                className={`
+                    flex items-center gap-2 px-6 py-2 rounded-lg font-bold transition-all shadow-lg min-w-[120px] justify-center
+                    ${playbackMode === 'ALL'
+                        ? 'bg-red-600 hover:bg-red-500 text-white shadow-red-600/20' 
+                        : 'bg-orange-600 hover:bg-orange-500 text-white shadow-orange-600/20'
+                    }
+                `}
+            >
+                {playbackMode === 'ALL' ? (
+                    <><Square size={18} fill="currentColor" /> Stop All</>
+                ) : (
+                    <><Play size={18} fill="currentColor" /> Play All</>
+                )}
+            </button>
         </div>
       </div>
 
-      {/* Main Chord Row */}
-      <div className="w-full max-w-5xl grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-        {progression.map((chord, index) => (
-          <ChordSlot
-            key={index}
-            id={index}
-            selectedChord={chord}
-            isActive={playingIndex === index}
-            onSelect={(c) => handleChordChange(index, c)}
-            onPlay={() => playSingleChord(index)}
-            isPlaying={playingIndex === index}
-          />
-        ))}
+      {/* Main Content Area */}
+      <div className="w-full max-w-6xl flex flex-col gap-6 mb-10">
+        {renderRow(1, 0)}
+        {renderRow(2, 4)}
       </div>
 
       {/* Large Global Keyboard */}
-      <div className="w-full max-w-5xl mb-10">
+      <div className="w-full max-w-6xl mb-10">
         <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-6 shadow-2xl">
             <div className="flex justify-between items-end mb-4">
                 <div>
                     <h3 className="text-lg font-bold text-neutral-200">Master Keyboard</h3>
                     <p className="text-sm text-neutral-500">
                         {playingIndex !== null 
-                            ? `Playing: ${progression[playingIndex]}` 
+                            ? `Playing: ${progression[playingIndex]} (Slot ${playingIndex + 1})` 
                             : 'Interactive Mode - Click keys to play'}
                     </p>
                 </div>
@@ -277,51 +318,11 @@ const App: React.FC = () => {
         </div>
       </div>
 
-      {/* AI Generator Section */}
-      <div className="w-full max-w-5xl">
-        <div className="bg-gradient-to-r from-neutral-800 to-neutral-900 rounded-2xl p-0.5 border border-neutral-800">
-            <div className="bg-neutral-950/80 backdrop-blur-sm rounded-xl p-6 flex flex-col md:flex-row items-center gap-6">
-                <div className="flex-1 w-full">
-                    <label className="block text-sm font-medium text-neutral-400 mb-2 flex items-center gap-2">
-                        <Wand2 size={16} className="text-orange-500" />
-                        AI Generator
-                    </label>
-                    <div className="flex gap-2">
-                        <input
-                            type="text"
-                            value={prompt}
-                            onChange={(e) => setPrompt(e.target.value)}
-                            placeholder="Describe a mood (e.g., 'Dark Industrial', 'Cyberpunk Jazz')"
-                            className="flex-1 bg-neutral-900 border border-neutral-700 text-neutral-200 rounded-lg px-4 py-3 focus:ring-1 focus:ring-orange-500 focus:border-orange-500 focus:outline-none placeholder-neutral-600"
-                            onKeyDown={(e) => e.key === 'Enter' && handleAiGenerate()}
-                        />
-                        <button
-                            onClick={handleAiGenerate}
-                            disabled={isGenerating || !prompt.trim()}
-                            className="bg-neutral-800 hover:bg-neutral-700 disabled:opacity-50 disabled:cursor-not-allowed text-orange-500 border border-neutral-700 px-6 py-2 rounded-lg font-semibold transition-all flex items-center gap-2 min-w-[140px] justify-center"
-                        >
-                            {isGenerating ? <Loader2 className="animate-spin" size={20} /> : 'Generate'}
-                        </button>
-                    </div>
-                    {aiError && <p className="text-red-900 text-sm mt-2">{aiError}</p>}
-                </div>
-
-                <div className="h-12 w-[1px] bg-neutral-800 hidden md:block"></div>
-
-                <button
-                    onClick={handleRandomize}
-                    className="flex items-center gap-2 text-neutral-500 hover:text-orange-500 transition-colors px-4 py-2 hover:bg-neutral-900 rounded-lg"
-                >
-                    <RefreshCw size={18} />
-                    <span>Randomize</span>
-                </button>
-            </div>
-        </div>
-      </div>
-
       {/* Footer / Instructions */}
-      <div className="mt-12 text-neutral-600 text-sm max-w-2xl text-center">
-        <p>Tip: Click "Play All" to hear the full arrangement. Use the dropdowns to manually tweak chords, or let Gemini AI suggest a vibe.</p>
+      <div className="mt-8 text-neutral-600 text-sm max-w-2xl text-center pb-8">
+        <p>
+          2026 loserworks / hybridproduction , for more visit <a href="https://www.jray.me" target="_blank" rel="noopener noreferrer" className="text-orange-500 hover:text-orange-400 underline decoration-orange-500/30 transition-colors">https://www.jray.me</a>
+        </p>
       </div>
 
     </div>
