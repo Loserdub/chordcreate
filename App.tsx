@@ -2,8 +2,8 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { ChordSlot } from './components/ChordSlot';
 import { PianoKeyboard } from './components/PianoKeyboard';
 import { audioService } from './services/audioService';
-import { DEFAULT_PROGRESSION } from './constants';
-import { Play, Square, Download } from 'lucide-react';
+import { DEFAULT_PROGRESSION, PRESET_PROGRESSIONS, AVAILABLE_CHORDS } from './constants';
+import { Play, Square, Download, Activity, Music2, Sparkles, Shuffle } from 'lucide-react';
 import * as Tone from 'tone';
 import { Midi } from '@tonejs/midi';
 
@@ -21,6 +21,7 @@ const App: React.FC = () => {
   const [playingIndex, setPlayingIndex] = useState<number | null>(null);
   const [playbackMode, setPlaybackMode] = useState<PlaybackMode>(null);
   const [bpm, setBpm] = useState(90);
+  const [selectedPresetName, setSelectedPresetName] = useState<string>('');
   
   // Refs for transport loop and timeouts
   const stepRef = useRef<number>(0);
@@ -37,6 +38,27 @@ const App: React.FC = () => {
     
     // Play preview on change (short)
     audioService.playChord(newChord, "8n");
+  };
+
+  const handlePresetSelect = (presetName: string) => {
+    setSelectedPresetName(presetName);
+    const preset = PRESET_PROGRESSIONS.find(p => p.name === presetName);
+    if (preset) {
+      stopAll();
+      setProgression([...preset.chords]);
+      audioService.playChord(preset.chords[0], "4n");
+    }
+  };
+
+  const randomizeProgression = () => {
+    stopAll();
+    setSelectedPresetName('');
+    const shuffled = Array.from({ length: 8 }, () => {
+      const randomIndex = Math.floor(Math.random() * AVAILABLE_CHORDS.length);
+      return AVAILABLE_CHORDS[randomIndex];
+    });
+    setProgression(shuffled);
+    audioService.playChord(shuffled[0], "4n");
   };
 
   const playSingleChord = async (index: number) => {
@@ -180,7 +202,7 @@ const App: React.FC = () => {
   }, [bpm]);
 
   const renderRow = (rowId: number, startIndex: number) => (
-    <div className="flex flex-col md:flex-row gap-4 items-stretch bg-neutral-900/20 p-4 rounded-2xl border border-neutral-800/50">
+    <div className="flex flex-col md:flex-row gap-4 items-stretch bg-neutral-900/40 p-4 rounded-2xl border border-white/[0.08] backdrop-blur-sm shadow-xl">
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 flex-grow">
             {progression.slice(startIndex, startIndex + 4).map((chord, i) => {
                 const globalIndex = startIndex + i;
@@ -199,33 +221,33 @@ const App: React.FC = () => {
         </div>
         
         {/* Row Controls Sidebar */}
-        <div className="flex flex-row md:flex-col justify-center gap-3 min-w-[140px] bg-neutral-900 p-4 rounded-xl border border-neutral-800">
-             <div className="text-xs font-bold text-neutral-500 uppercase tracking-widest text-center mb-1">
-                 Row {rowId}
+        <div className="flex flex-row md:flex-col justify-center gap-3 min-w-[140px] bg-neutral-950/80 p-4 rounded-xl border border-white/[0.08]">
+             <div className="font-mono text-[10px] font-bold text-neutral-400 uppercase tracking-widest text-center mb-0.5">
+                 ROW 0{rowId}
              </div>
              
              <button
                 onClick={() => togglePlayback(rowId === 1 ? 'ROW1' : 'ROW2')}
                 className={`
-                    flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-bold transition-all
+                    flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg font-mono text-xs font-bold transition-all border
                     ${(rowId === 1 && playbackMode === 'ROW1') || (rowId === 2 && playbackMode === 'ROW2')
-                        ? 'bg-red-900/80 text-red-100 hover:bg-red-800' 
-                        : 'bg-neutral-800 text-neutral-300 hover:bg-neutral-700 hover:text-white'
+                        ? 'bg-red-500/20 text-red-400 border-red-500/40 hover:bg-red-500/30' 
+                        : 'bg-neutral-900 text-neutral-300 border-white/[0.08] hover:border-orange-500/40 hover:text-orange-400 hover:bg-neutral-850'
                     }
                 `}
              >
                 {(rowId === 1 && playbackMode === 'ROW1') || (rowId === 2 && playbackMode === 'ROW2') ? (
-                    <><Square size={16} fill="currentColor"/> Stop</>
+                    <><Square size={13} fill="currentColor"/> STOP</>
                 ) : (
-                    <><Play size={16} fill="currentColor"/> Play</>
+                    <><Play size={13} fill="currentColor"/> PLAY</>
                 )}
              </button>
 
              <button
                 onClick={() => exportMidi(startIndex, 4, `row-${rowId}.mid`)}
-                className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-neutral-950 hover:bg-neutral-800 text-neutral-400 hover:text-orange-500 rounded-lg border border-neutral-800 transition-colors font-semibold text-xs"
+                className="flex-1 flex items-center justify-center gap-1.5 px-4 py-2.5 bg-neutral-900 hover:bg-neutral-800 text-neutral-400 hover:text-orange-400 rounded-lg border border-white/[0.08] transition-all font-mono text-[11px] font-semibold"
              >
-                <Download size={16} />
+                <Download size={13} />
                 MIDI
              </button>
         </div>
@@ -233,97 +255,142 @@ const App: React.FC = () => {
   );
 
   return (
-    <div className="min-h-screen bg-neutral-950 text-neutral-200 flex flex-col items-center py-10 px-4 font-sans">
+    <div className="min-h-screen bg-[#070709] text-neutral-100 flex flex-col items-center py-8 px-4 font-sans selection:bg-orange-500 selection:text-black">
       
       {/* Header */}
-      <div className="w-full max-w-6xl mb-8 flex flex-col md:flex-row justify-between items-center gap-6">
+      <header className="w-full max-w-6xl mb-8 flex flex-col md:flex-row justify-between items-center gap-6 pb-6 border-b border-white/[0.08]">
         <div className="flex-1 text-center md:text-left">
-            <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-orange-500 to-neutral-200">
+          <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-orange-500/10 border border-orange-500/20 text-orange-400 text-[10px] font-mono font-bold tracking-widest uppercase mb-2">
+            <Activity size={12} className="animate-pulse" />
+            HPS-1.0 Certified Audio Tool
+          </div>
+          <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-orange-400 via-orange-500 to-neutral-200">
             ChordFlow AI
-            </h1>
-            <p className="text-neutral-500 mt-2">8-Step Sequence Arranger</p>
+          </h1>
+          <p className="text-neutral-400 text-xs font-mono mt-1 tracking-wide">
+            8-Step Sequential Chord Arranger & Voice Leading Engine
+          </p>
         </div>
 
         {/* Global Controls */}
-        <div className="flex flex-wrap justify-center gap-4 bg-neutral-900 p-3 rounded-xl border border-neutral-800 shadow-xl">
+        <div className="flex flex-wrap items-center justify-center gap-3 bg-neutral-900/80 p-3 rounded-2xl border border-white/[0.08] shadow-2xl backdrop-blur-md">
+             {/* Preset Selector */}
+             <div className="flex items-center gap-2">
+               <div className="relative">
+                 <select
+                   value={selectedPresetName}
+                   onChange={(e) => handlePresetSelect(e.target.value)}
+                   className="appearance-none bg-neutral-950 text-neutral-200 border border-white/[0.08] hover:border-orange-500/40 rounded-lg py-2 pl-8 pr-7 text-xs font-mono font-semibold focus:outline-none focus:ring-1 focus:ring-orange-500 cursor-pointer transition-colors"
+                 >
+                   <option value="" disabled>✨ HARMONIC PRESETS</option>
+                   {PRESET_PROGRESSIONS.map(p => (
+                     <option key={p.name} value={p.name} className="bg-neutral-900 text-neutral-200">
+                       {p.name} ({p.vibe})
+                     </option>
+                   ))}
+                 </select>
+                 <Sparkles size={13} className="absolute left-2.5 top-2.5 text-orange-500 pointer-events-none" />
+                 <div className="absolute right-2.5 top-3 pointer-events-none text-neutral-500">
+                   <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                   </svg>
+                 </div>
+               </div>
+               <button
+                 onClick={randomizeProgression}
+                 className="p-2 rounded-lg bg-neutral-950 hover:bg-neutral-850 text-neutral-400 hover:text-orange-400 border border-white/[0.08] hover:border-orange-500/40 transition-all"
+                 title="Randomize 8-chord progression"
+               >
+                 <Shuffle size={14} />
+               </button>
+             </div>
+
+             <div className="w-[1px] h-6 bg-white/[0.08] hidden md:block"></div>
+
              <button
                 onClick={() => exportMidi(0, 8, 'full-progression.mid')}
-                className="flex items-center gap-2 px-4 py-2 bg-neutral-800 hover:bg-neutral-700 text-neutral-300 rounded-lg border border-neutral-700 transition-colors font-semibold text-sm shadow-sm"
+                className="flex items-center gap-2 px-4 py-2 bg-neutral-950 hover:bg-neutral-850 text-neutral-200 rounded-lg border border-white/[0.08] hover:border-orange-500/40 transition-all font-mono text-xs font-semibold shadow-sm"
              >
-                <Download size={16} className="text-orange-500" />
-                Export Full MIDI
+                <Download size={14} className="text-orange-500" />
+                EXPORT MIDI
              </button>
 
-            <div className="w-[1px] h-8 bg-neutral-800 hidden md:block"></div>
+            <div className="w-[1px] h-6 bg-white/[0.08] hidden md:block"></div>
 
-            <div className="flex items-center gap-3">
-                <span className="text-xs font-bold text-neutral-500 uppercase">BPM</span>
+            <div className="flex items-center gap-3 px-1">
+                <span className="text-[10px] font-mono font-bold text-neutral-400 uppercase tracking-widest">BPM</span>
                 <input 
                     type="range" 
                     min="60" 
                     max="160" 
                     value={bpm} 
                     onChange={(e) => setBpm(Number(e.target.value))}
-                    className="w-24 accent-orange-600 h-1 bg-neutral-800 rounded-lg appearance-none cursor-pointer"
+                    className="w-24 accent-orange-500 h-1 bg-neutral-800 rounded-lg appearance-none cursor-pointer"
                 />
-                <span className="text-sm font-mono text-orange-500 w-8">{bpm}</span>
+                <span className="text-xs font-mono font-bold text-orange-400 w-8">{bpm}</span>
             </div>
 
-            <div className="w-[1px] h-8 bg-neutral-800 hidden md:block"></div>
+            <div className="w-[1px] h-6 bg-white/[0.08] hidden md:block"></div>
 
             <button
                 onClick={() => togglePlayback('ALL')}
                 className={`
-                    flex items-center gap-2 px-6 py-2 rounded-lg font-bold transition-all shadow-lg min-w-[120px] justify-center
+                    flex items-center gap-2 px-5 py-2 rounded-lg font-mono text-xs font-bold transition-all shadow-lg min-w-[110px] justify-center border
                     ${playbackMode === 'ALL'
-                        ? 'bg-red-600 hover:bg-red-500 text-white shadow-red-600/20' 
-                        : 'bg-orange-600 hover:bg-orange-500 text-white shadow-orange-600/20'
+                        ? 'bg-red-500/20 text-red-400 border-red-500/40 shadow-red-500/10' 
+                        : 'bg-orange-500 text-neutral-950 border-orange-400 shadow-orange-500/20 hover:bg-orange-400'
                     }
                 `}
             >
                 {playbackMode === 'ALL' ? (
-                    <><Square size={18} fill="currentColor" /> Stop All</>
+                    <><Square size={14} fill="currentColor" /> STOP ALL</>
                 ) : (
-                    <><Play size={18} fill="currentColor" /> Play All</>
+                    <><Play size={14} fill="currentColor" /> PLAY ALL</>
                 )}
             </button>
         </div>
-      </div>
+      </header>
 
       {/* Main Content Area */}
-      <div className="w-full max-w-6xl flex flex-col gap-6 mb-10">
+      <main className="w-full max-w-6xl flex flex-col gap-6 mb-8">
         {renderRow(1, 0)}
         {renderRow(2, 4)}
-      </div>
+      </main>
 
-      {/* Large Global Keyboard */}
-      <div className="w-full max-w-6xl mb-10">
-        <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-6 shadow-2xl">
-            <div className="flex justify-between items-end mb-4">
-                <div>
-                    <h3 className="text-lg font-bold text-neutral-200">Master Keyboard</h3>
-                    <p className="text-sm text-neutral-500">
-                        {playingIndex !== null 
-                            ? `Playing: ${progression[playingIndex]} (Slot ${playingIndex + 1})` 
-                            : 'Interactive Mode - Click keys to play'}
-                    </p>
+      {/* Master Keyboard Visualizer */}
+      <div className="w-full max-w-6xl mb-8">
+        <div className="bg-neutral-900/40 border border-white/[0.08] rounded-2xl p-5 shadow-2xl backdrop-blur-sm">
+            <div className="flex justify-between items-center mb-4">
+                <div className="flex items-center gap-2">
+                    <Music2 size={16} className="text-orange-500" />
+                    <h3 className="text-sm font-mono font-bold text-neutral-200 uppercase tracking-wider">Master Keyboard</h3>
+                </div>
+                <div className="font-mono text-xs text-neutral-400 bg-neutral-950 px-3 py-1 rounded-md border border-white/[0.06]">
+                    {playingIndex !== null 
+                        ? `PLAYING: ${progression[playingIndex]} (SLOT 0${playingIndex + 1})` 
+                        : 'INTERACTIVE MODE — CLICK KEYS TO PLAY'}
                 </div>
             </div>
             
             <PianoKeyboard 
                 activeNotes={playingIndex !== null ? audioService.getNotesForChord(progression[playingIndex]) : []} 
-                height={180} 
+                height={170} 
                 interactive={true}
             />
         </div>
       </div>
 
-      {/* Footer / Instructions */}
-      <div className="mt-8 text-neutral-600 text-sm max-w-2xl text-center pb-8">
-        <p>
-          2026 loserworks / hybridproduction , for more visit <a href="https://www.jray.me" target="_blank" rel="noopener noreferrer" className="text-orange-500 hover:text-orange-400 underline decoration-orange-500/30 transition-colors">https://www.jray.me</a>
-        </p>
-      </div>
+      {/* Footer */}
+      <footer className="mt-auto py-6 text-neutral-400 text-xs font-mono border-t border-white/[0.08] w-full max-w-6xl text-center flex flex-col sm:flex-row justify-between items-center gap-4">
+        <div>
+          © 2026 <a href="https://trustnodelogic.com" target="_blank" rel="noopener noreferrer" className="text-neutral-300 hover:text-orange-400 transition-colors">Trust Node Logic</a> · Justin Ray (JRAY / loserdub)
+        </div>
+        <div className="flex items-center gap-4">
+          <a href="https://trustnodelogic.com" target="_blank" rel="noopener noreferrer" className="text-neutral-400 hover:text-orange-400 transition-colors">trustnodelogic.com</a>
+          <span>·</span>
+          <a href="https://www.reddit.com/r/hybridproduction/" target="_blank" rel="noopener noreferrer" className="text-neutral-400 hover:text-orange-400 transition-colors">r/hybridproduction</a>
+        </div>
+      </footer>
 
     </div>
   );

@@ -56,6 +56,34 @@ export const DEFAULT_PROGRESSION = [
   "E Min", "A Min", "D Min", "G 7"
 ];
 
+export const PRESET_PROGRESSIONS = [
+  {
+    name: "Pop Mainstay",
+    vibe: "Catchy & Upbeat",
+    chords: ["C Maj", "G Maj", "A Min", "F Maj", "C Maj", "G Maj", "D Min", "G 7"]
+  },
+  {
+    name: "Lo-Fi Chill",
+    vibe: "Smooth & Relaxed",
+    chords: ["C Maj7", "A Min7", "D Min7", "G 7", "E Min", "A Min7", "F Maj7", "G 7"]
+  },
+  {
+    name: "Neo-Soul Jazz",
+    vibe: "Soulful & Color",
+    chords: ["D Min7", "G 7", "C Maj7", "A Min7", "F Maj7", "E 7", "A Min7", "D 7"]
+  },
+  {
+    name: "Dark & Cinematic",
+    vibe: "Suspenseful & Heavy",
+    chords: ["A Min", "F Min", "C Min", "G Min", "D Min", "Bb Min", "Ab Maj", "E Min"]
+  },
+  {
+    name: "Sad Ballad",
+    vibe: "Emotional & Nostalgic",
+    chords: ["A Min", "F Maj", "C Maj", "G Maj", "A Min", "D Min", "F Maj", "G 7"]
+  }
+];
+
 export const getChordDescription = (name: string): string => {
   if (name.includes("Maj7")) return "Dreamy, nostalgic, jazz color";
   if (name.includes("Min7")) return "Mellow, smooth, soulful";

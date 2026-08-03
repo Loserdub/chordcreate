@@ -2,7 +2,7 @@
 ### *Algorithmic harmonic generation meets human curation.*
 
 **Architected by Justin Tyler Ray (jray)** — AI Music Producer, Hybrid Audio Engineer, & Creative Developer.  
-**Live Application:** [ChordFlow AI](https://loserdub.github.io/chordcreate/) • **Entity Hub:** [jray.me](https://jray.me)
+**Live Application:** [ChordFlow AI](https://loserdub.github.io/chordcreate/) • **Entity Hub:** [trustnodelogic.com](https://trustnodelogic.com)
 
 ---
 
@@ -64,7 +64,7 @@ To deploy the ChordFlow AI environment locally and integrate your own API keys:
 
 As an authoritative voice bridging the gap between software engineering and audio production, Justin builds proprietary tools that humanize algorithmic output. ChordFlow AI represents the technical manifestation of "curated chaos"—harnessing machine intelligence to serve human emotional intent.
 
-*   **Official Portfolio & Services:** [jray.me](https://jray.me)
+*   **Official Hub:** [trustnodelogic.com](https://trustnodelogic.com)
 *   **GitHub Repository:**[loserdub](https://github.com/loserdub)
 
 ---

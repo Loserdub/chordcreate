@@ -12,12 +12,11 @@ export const PianoKeyboard: React.FC<PianoKeyboardProps> = ({
   height = 120, 
   interactive = true 
 }) => {
-  // Improved Render Strategy: Absolute positioning for black keys on top of a flex row of white keys
   const renderKeyboard = () => {
     const startOctave = 4;
     const endOctave = 5;
     const whiteNotes = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
-    const blackNotes = ['C#', 'D#', null, 'F#', 'G#', 'A#', null]; // Spacing map
+    const blackNotes = ['C#', 'D#', null, 'F#', 'G#', 'A#', null];
 
     const keys: React.ReactNode[] = [];
     let whiteKeyIndex = 0;
@@ -25,7 +24,6 @@ export const PianoKeyboard: React.FC<PianoKeyboardProps> = ({
     for (let oct = startOctave; oct <= endOctave; oct++) {
       whiteNotes.forEach((note, idx) => {
         const fullNote = `${note}${oct}`;
-        // Logic to determine if a white key is effectively active (handling enharmonics crudely for display)
         const isActive = activeNotes.includes(fullNote) || 
                          (note === 'E' && activeNotes.includes(`Fb${oct}`)) || 
                          (note === 'B' && activeNotes.includes(`Cb${oct}`)) ||
@@ -49,19 +47,17 @@ export const PianoKeyboard: React.FC<PianoKeyboardProps> = ({
           >
              {/* Key Label */}
              {isActive && (
-               <div className="absolute bottom-3 inset-x-0 text-center text-xs font-bold text-white pointer-events-none shadow-black drop-shadow-md">
+               <div className="absolute bottom-2 inset-x-0 text-center font-mono text-[10px] font-bold text-white pointer-events-none drop-shadow-md">
                  {note}
                </div>
              )}
           </div>
         );
 
-        // Black Key (if exists after this white key)
+        // Black Key
         const blackNote = blackNotes[idx];
         if (blackNote) {
-            // Find if active. Check both Sharp and Flat names
             const sharpName = `${blackNote}${oct}`;
-            // Quick enhance mapping
             const enharmonicMap: Record<string, string> = {
                 'C#': 'Db', 'D#': 'Eb', 'F#': 'Gb', 'G#': 'Ab', 'A#': 'Bb'
             };
@@ -74,20 +70,19 @@ export const PianoKeyboard: React.FC<PianoKeyboardProps> = ({
                     key={sharpName}
                     onMouseDown={(e) => { e.stopPropagation(); interactive && audioService.playNote(sharpName); }}
                     className={`
-                        absolute z-10 w-[8%] h-[60%] rounded-b-[4px] rounded-t-[2px] cursor-pointer select-none 
+                        absolute z-10 w-[7.8%] h-[60%] rounded-b-[4px] rounded-t-[2px] cursor-pointer select-none 
                         transition-all duration-75 ease-out origin-top
                         border-x border-b border-black ring-1 ring-white/10
                         ${isBlackActive 
-                            ? 'bg-gradient-to-b from-orange-600 to-orange-800 shadow-[inset_0_2px_4px_rgba(0,0,0,0.5)] translate-y-[1px] scale-[0.96]' 
-                            : 'bg-gradient-to-b from-neutral-800 to-black shadow-lg'
+                            ? 'bg-gradient-to-b from-orange-500 to-orange-700 shadow-[inset_0_2px_4px_rgba(0,0,0,0.5)] translate-y-[1px] scale-[0.96]' 
+                            : 'bg-gradient-to-b from-neutral-800 to-neutral-950 shadow-md'
                         }
                     `}
                     style={{
-                        left: `${(whiteKeyIndex + 1) * (100 / 14) - 4}%`, // 14 white keys total (2 octaves)
+                        left: `${(whiteKeyIndex + 1) * (100 / 14) - 3.9}%`,
                     }}
                 >
-                   {/* Optional: subtle line detail for tactile look */}
-                   {!isBlackActive && <div className="absolute inset-x-1 bottom-2 h-[1px] bg-neutral-800/30"></div>}
+                   {!isBlackActive && <div className="absolute inset-x-1 bottom-1.5 h-[1px] bg-white/10"></div>}
                 </div>
             );
         }
@@ -96,7 +91,7 @@ export const PianoKeyboard: React.FC<PianoKeyboardProps> = ({
     }
 
     return (
-        <div className="relative flex gap-[2px] w-full h-full bg-neutral-900 p-1.5 rounded-lg shadow-inner overflow-hidden border border-neutral-800">
+        <div className="relative flex gap-[2px] w-full h-full bg-neutral-950 p-1.5 rounded-xl shadow-inner overflow-hidden border border-white/[0.08]">
             {keys}
         </div>
     );
