@@ -22,9 +22,9 @@ const App: React.FC = () => {
   const [playingIndex, setPlayingIndex] = useState<number | null>(null);
   const [playbackMode, setPlaybackMode] = useState<PlaybackMode>(null);
   const [bpm, setBpm] = useState(90);
-  const [selectedVibeId, setSelectedVibeId] = useState<string>('ether');
-  const [selectedProgressionId, setSelectedProgressionId] = useState<string>('ether-1');
-  const [vibeIndices, setVibeIndices] = useState<Record<string, number>>({ ether: 0 });
+  const [selectedVibeId, setSelectedVibeId] = useState<string>('house');
+  const [selectedProgressionId, setSelectedProgressionId] = useState<string>('house-1');
+  const [vibeIndices, setVibeIndices] = useState<Record<string, number>>({ house: 0 });
   const [selectedToneId, setSelectedToneId] = useState<SynthToneId>('rhodes');
 
   
@@ -333,7 +333,7 @@ const App: React.FC = () => {
                    className="appearance-none bg-neutral-950 text-neutral-200 border border-white/[0.08] hover:border-orange-500/40 rounded-lg py-2 pl-8 pr-7 text-xs font-mono font-semibold focus:outline-none focus:ring-1 focus:ring-orange-500 cursor-pointer transition-colors max-w-[220px] sm:max-w-none truncate"
                    title="Select a harmonic vibe or progression"
                  >
-                   <option value="" disabled>✨ HARMONIC VIBES</option>
+                   <option value="" disabled>🎵 MUSIC GENRES & CHORDS</option>
                    {VIBE_GROUPS.map(vibe => (
                      <optgroup key={vibe.id} label={`${vibe.icon} ${vibe.name}`} className="bg-neutral-900 text-orange-400 font-bold">
                        <option value={`vibe:${vibe.id}`} className="bg-neutral-900 text-neutral-100 font-semibold">

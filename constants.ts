@@ -160,6 +160,7 @@ export const CHORD_LIBRARY: ChordMap = {
   "B Maj": ["B4", "D#5", "F#5"],
   "B Min": ["B4", "D5", "F#5"],
   "B 7": ["B4", "D#5", "F#5", "A5"],
+  "B Maj7": ["B4", "D#5", "F#5", "A#5"],
   "B Min7": ["B4", "D5", "F#5", "A5"],
   "B Dim": ["B4", "D5", "F5"],
   "B Min9": ["B4", "D5", "F#5", "A5", "C#6"],
@@ -173,296 +174,536 @@ export const CHORD_LIBRARY: ChordMap = {
 export const AVAILABLE_CHORDS = Object.keys(CHORD_LIBRARY).sort();
 
 export const DEFAULT_PROGRESSION = [
-  "C Maj9", "F Maj9", "A Min9", "G 7sus4",
-  "C Sus2", "F Maj9", "D Min9", "G 9"
+  "C Min9", "F Min9", "Ab Maj9", "G 7sus4",
+  "C Min9", "Eb Maj9", "F Min9", "G 7b9"
 ];
 
 export const VIBE_GROUPS: VibeGroup[] = [
   {
-    id: "ether",
-    name: "Ether & Nostalgia",
-    description: "Weightless ambient pads, lush maj9 extensions, and open suspended intervals",
-    icon: "🌌",
+    id: "house",
+    name: "House Music",
+    description: "Deep, soulful, and progressive club grooves with rich 9ths and suspended chords",
+    icon: "🎧",
     progressions: [
       {
-        id: "ether-1",
-        name: "Cosmic Drift",
-        chords: ["C Maj9", "F Maj9", "A Min9", "G 7sus4", "C Sus2", "F Maj9", "D Min9", "G 9"]
+        id: "house-1",
+        name: "Deep House Groove",
+        chords: ["C Min9", "F Min9", "Ab Maj9", "G 7sus4", "C Min9", "Eb Maj9", "F Min9", "G 7b9"]
       },
       {
-        id: "ether-2",
-        name: "Bioluminescence",
+        id: "house-2",
+        name: "Chicago Classic",
+        chords: ["A Min9", "D 9", "F Maj9", "G 7sus4", "A Min9", "C Maj9", "F Maj9", "E 7#9"]
+      },
+      {
+        id: "house-3",
+        name: "Soulful Club",
+        chords: ["F Maj9", "E 7b9", "A Min9", "D 9", "D Min9", "G 9", "C Maj9", "C 7b9"]
+      },
+      {
+        id: "house-4",
+        name: "Sunset Ibiza",
+        chords: ["Eb Maj9", "C Min9", "F Min9", "Bb 9", "G Min9", "C 7alt", "F Min9", "Bb 7sus4"]
+      },
+      {
+        id: "house-5",
+        name: "French Touch",
+        chords: ["D Min9", "G 9", "C Maj9", "A 7b9", "F Maj9", "E 7alt", "A Min9", "D 9"]
+      },
+      {
+        id: "house-6",
+        name: "Acid Horizon",
+        chords: ["G Min9", "Eb Maj9", "C Min9", "D 7b9", "G Min9", "Bb Maj9", "C Min9", "D 7#9"]
+      },
+      {
+        id: "house-7",
+        name: "Progressive Peak",
+        chords: ["B Min9", "G Maj9", "D Maj9", "A 9", "E Min9", "G Maj9", "A Sus4", "F# 7alt"]
+      },
+      {
+        id: "house-8",
+        name: "Vocal Anthem",
+        chords: ["C Maj9", "G 7sus4", "A Min9", "F Maj9", "C Add9", "G 9", "D Min9", "G 7b9"]
+      }
+    ]
+  },
+  {
+    id: "rock",
+    name: "Rock & Alternative",
+    description: "Driven power suspensions, augmented tension, and atmospheric alternative chords",
+    icon: "🎸",
+    progressions: [
+      {
+        id: "rock-1",
+        name: "Alternative Anthem",
+        chords: ["E Min", "C Add9", "G Maj", "D Sus4", "E Min", "C Maj7", "A Sus2", "B Aug"]
+      },
+      {
+        id: "rock-2",
+        name: "Psychedelic Echo",
+        chords: ["A Min", "G Sus4", "F Maj7", "E Aug", "A Min", "D Sus2", "F Maj9", "E 7b9"]
+      },
+      {
+        id: "rock-3",
+        name: "Post-Rock Crescendo",
+        chords: ["C Add9", "G Sus4", "A Min9", "F Maj6", "C Sus2", "G 9", "F Maj7", "G 7sus4"]
+      },
+      {
+        id: "rock-4",
+        name: "Grunge Distortion",
+        chords: ["D Min", "F Maj", "C Maj", "G Sus4", "Bb Maj", "F Maj", "A Aug", "D Min"]
+      },
+      {
+        id: "rock-5",
+        name: "Math Rock Geometry",
+        chords: ["E Min9", "C# m7b5", "C Maj9", "B 7alt", "A Min9", "F# m7b5", "B 7b9", "E Min"]
+      },
+      {
+        id: "rock-6",
+        name: "Stadium Power",
+        chords: ["A Min", "F Maj7", "C Add9", "G Sus4", "D Min9", "F Maj7", "G 9", "E 7#9"]
+      },
+      {
+        id: "rock-7",
+        name: "Progressive Odyssey",
+        chords: ["B Min", "G Maj7", "D Maj9", "A Sus4", "E Min9", "C Maj9", "F# Aug", "B Min"]
+      },
+      {
+        id: "rock-8",
+        name: "Desert Rock Sunset",
+        chords: ["G Min", "Eb Maj7", "F Maj", "D Aug", "G Min", "C Min9", "D 7b9", "G Min"]
+      }
+    ]
+  },
+  {
+    id: "pop",
+    name: "Pop & Synth-Pop",
+    description: "Catchy, lush modern pop voicings with bright add9 and major 9 extensions",
+    icon: "✨",
+    progressions: [
+      {
+        id: "pop-1",
+        name: "Modern Synthpop",
+        chords: ["C Maj9", "G 7sus4", "A Min9", "F Maj9", "C Add9", "G 9", "D Min9", "G 7b9"]
+      },
+      {
+        id: "pop-2",
+        name: "Dark Pop Nocturne",
+        chords: ["A Min9", "F Maj9", "C Maj9", "E 7b9", "D Min9", "F Maj7", "B m7b5", "E 7#9"]
+      },
+      {
+        id: "pop-3",
+        name: "K-Pop Chroma",
+        chords: ["D Maj9", "F# 7b9", "B Min9", "E 9", "G Maj9", "C 9", "F# Min7", "B 7alt"]
+      },
+      {
+        id: "pop-4",
+        name: "Bedroom Dream",
         chords: ["F Maj9", "C Add9", "G Sus4", "A Min9", "F Maj9", "E Min7", "D Min9", "G 7sus4"]
       },
       {
-        id: "ether-3",
-        name: "Solar Flare",
-        chords: ["Eb Maj9", "Ab Maj9", "C Min9", "F 9", "Eb Maj9", "Bb 7sus4", "F Min9", "G 7b9"]
+        id: "pop-5",
+        name: "Glitter Disco",
+        chords: ["Eb Maj9", "C Min9", "F Min9", "Bb 9", "G Min9", "C 7b9", "F Min9", "Bb 7sus4"]
       },
       {
-        id: "ether-4",
-        name: "Stargazing",
-        chords: ["G Maj9", "C Maj9", "E Min9", "D Sus4", "G Sus2", "C Maj9", "A Min9", "D 9"]
+        id: "pop-6",
+        name: "Summer Festival",
+        chords: ["G Maj9", "D Sus4", "E Min9", "C Maj9", "G Add9", "D 9", "C Maj9", "D 7sus4"]
       },
       {
-        id: "ether-5",
-        name: "Velvet Horizon",
-        chords: ["D Maj9", "G Maj9", "B Min9", "A Sus4", "D Add9", "G Maj9", "E Min9", "A 7sus4"]
+        id: "pop-7",
+        name: "Electro-Pop Rush",
+        chords: ["A Min9", "F Maj9", "D Min9", "G 7sus4", "C Maj9", "F Maj9", "B m7b5", "E 7b9"]
       },
       {
-        id: "ether-6",
-        name: "Subterranean Light",
-        chords: ["A Min9", "F Maj9", "C Maj9", "G 7sus4", "D Min9", "A Min9", "F Maj9", "G 9"]
-      },
-      {
-        id: "ether-7",
-        name: "Floating In Ether",
-        chords: ["C Sus2", "G 7sus4", "F Maj9", "A Min9", "D Sus2", "F Maj9", "G 9", "C Add9"]
-      },
-      {
-        id: "ether-8",
-        name: "Infinite Echoes",
-        chords: ["Bb Maj9", "Eb Maj9", "G Min9", "F 7sus4", "Bb Add9", "Eb Maj9", "C Min9", "F 9"]
+        id: "pop-8",
+        name: "Neon Euphoria",
+        chords: ["Bb Maj9", "F 7sus4", "G Min9", "Eb Maj9", "Bb Add9", "F 9", "C Min9", "F 7b9"]
       }
     ]
   },
   {
-    id: "cinematic",
-    name: "Dark Tension & Noir",
-    description: "Dramatic film scoring with half-diminished, altered dominants, and b9 dissonances",
-    icon: "🔥",
+    id: "country",
+    name: "Country & Americana",
+    description: "Acoustic resonance, open add9 sparkle, and warm sus2 country storytelling",
+    icon: "🤠",
     progressions: [
       {
-        id: "cinematic-1",
-        name: "Neon Noir",
-        chords: ["A Min", "F# m7b5", "F Maj7", "E 7b9", "D Min9", "B m7b5", "E 7#9", "A Min"]
+        id: "country-1",
+        name: "Americana Porch",
+        chords: ["G Add9", "C Add9", "G Add9", "D Sus4", "E Min7", "C Add9", "G Add9", "D 9"]
       },
       {
-        id: "cinematic-2",
-        name: "Abyssal Descent",
-        chords: ["C Min9", "Ab Maj7", "D m7b5", "G 7b9", "Eb Maj7", "F Min9", "D Dim7", "G 7alt"]
+        id: "country-2",
+        name: "Alt-Country Dusk",
+        chords: ["C Add9", "F Maj6", "C Add9", "G Sus4", "A Min7", "F Maj9", "C Add9", "G 7"]
       },
       {
-        id: "cinematic-3",
-        name: "Gotham Syndicate",
-        chords: ["D Min9", "Bb Maj7", "E m7b5", "A 7b9", "G Min9", "Eb Maj7", "C# Dim7", "A 7#9"]
+        id: "country-3",
+        name: "Outlaw Sunset",
+        chords: ["A Min", "F Maj", "C Add9", "G Sus4", "D Min7", "F Maj6", "G 9", "E 7"]
       },
       {
-        id: "cinematic-4",
-        name: "Blood Moon",
-        chords: ["E Min9", "C Maj7", "F# m7b5", "B 7b9", "A Min9", "D 9", "C Maj7", "B 7alt"]
+        id: "country-4",
+        name: "Bluegrass Horizon",
+        chords: ["D Add9", "G Add9", "D Add9", "A Sus4", "B Min7", "G Add9", "E Min7", "A 9"]
       },
       {
-        id: "cinematic-5",
-        name: "Shadow Syndicate",
-        chords: ["G Min9", "Eb Maj7", "A m7b5", "D 7b9", "C Min9", "F 9", "D Dim7", "D 7b9"]
+        id: "country-5",
+        name: "Southern Twilight",
+        chords: ["E Min7", "C Add9", "G Add9", "D Sus4", "E Min9", "C Maj6", "A Sus2", "D 9"]
       },
       {
-        id: "cinematic-6",
-        name: "Obsidian Citadel",
-        chords: ["B Min", "G Maj7", "C# m7b5", "F# 7b9", "E Min9", "A 9", "G Maj7", "F# 7alt"]
+        id: "country-6",
+        name: "Prairie Wind",
+        chords: ["Eb Add9", "Ab Maj6", "Eb Add9", "Bb Sus4", "C Min7", "Ab Add9", "F Min7", "Bb 9"]
       },
       {
-        id: "cinematic-7",
-        name: "Vampiric Waltz",
-        chords: ["C Min", "G 7b9", "Ab Maj7", "Eb Maj9", "F Min9", "D m7b5", "G 7#9", "C Min"]
+        id: "country-7",
+        name: "Honky Tonk Color",
+        chords: ["G 9", "C Add9", "G 9", "D 7", "C Maj6", "G Add9", "A 9", "D 7b9"]
       },
       {
-        id: "cinematic-8",
-        name: "Eclipse Event",
-        chords: ["F Min9", "Db Maj7", "G m7b5", "C 7b9", "Bb Min9", "Eb 9", "Db Maj7", "C 7alt"]
+        id: "country-8",
+        name: "Acoustic Valley",
+        chords: ["F Maj6", "C Add9", "G Sus4", "A Min7", "F Maj9", "G 9", "C Add9", "C Maj6"]
       }
     ]
   },
   {
-    id: "neosoul",
-    name: "Neo-Soul & Velvet Silk",
-    description: "Warm, rich, buttery chromatic movements with lush minor 9 and dominant 7b9 colors",
-    icon: "🔮",
+    id: "indie",
+    name: "Indie & Dream Pop",
+    description: "Atmospheric, floating suspensions, maj9 colors, and math-indie shifts",
+    icon: "🌿",
     progressions: [
       {
-        id: "neosoul-1",
-        name: "Late Night Vinyl",
-        chords: ["D Min9", "G 9", "C Maj9", "A 7b9", "F Maj9", "E 7#9", "A Min9", "D 9"]
+        id: "indie-1",
+        name: "Dream Pop Cascade",
+        chords: ["C Sus2", "F Maj9", "A Min9", "G 7sus4", "D Sus2", "F Maj9", "G 9", "C Add9"]
       },
       {
-        id: "neosoul-2",
-        name: "Velvet Cigarette",
-        chords: ["F Maj9", "E 7b9", "A Min9", "D 9", "D Min9", "G 7sus4", "C Maj9", "C 7b9"]
+        id: "indie-2",
+        name: "Indie Folk Dawn",
+        chords: ["G Add9", "D Sus4", "E Min9", "C Maj6", "G Add9", "D 9", "C Maj9", "G Add9"]
       },
       {
-        id: "neosoul-3",
-        name: "Rooftop Rain",
+        id: "indie-3",
+        name: "Shoegaze Wall",
+        chords: ["F Maj9", "C Maj9", "G Sus4", "A Min9", "F Maj9", "E Min9", "D Min9", "G 7sus4"]
+      },
+      {
+        id: "indie-4",
+        name: "Math Indie Shift",
+        chords: ["D Maj9", "B Min9", "G Maj9", "A Sus4", "F# m7b5", "B 7b9", "E Min9", "A 9"]
+      },
+      {
+        id: "indie-5",
+        name: "Lo-Fi Indie Basement",
+        chords: ["A Min9", "D Sus2", "F Maj9", "G 7sus4", "C Maj9", "E Min7", "D Min9", "E 7b9"]
+      },
+      {
+        id: "indie-6",
+        name: "Coastal Sunlight",
+        chords: ["Eb Maj9", "Ab Maj6", "C Min9", "Bb Sus4", "Eb Add9", "Ab Maj9", "F Min9", "Bb 9"]
+      },
+      {
+        id: "indie-7",
+        name: "Midnight Transit",
+        chords: ["D Min9", "Bb Maj7", "G Min9", "A Aug", "D Min9", "F Maj9", "E m7b5", "A 7b9"]
+      },
+      {
+        id: "indie-8",
+        name: "Celestial Canopy",
+        chords: ["B Min9", "G Maj9", "D Maj9", "A Sus4", "E Min9", "G Maj6", "A 9", "F# 7alt"]
+      }
+    ]
+  },
+  {
+    id: "idm",
+    name: "IDM & Braindance",
+    description: "Complex algorithmic modulations, half-diminished steps, and glitch harmonies",
+    icon: "🤖",
+    progressions: [
+      {
+        id: "idm-1",
+        name: "Braindance Matrix",
+        chords: ["C Maj9", "Eb Maj9", "F# m7b5", "B 7b9", "E Maj9", "G Maj9", "Bb m7b5", "Eb 7b9"]
+      },
+      {
+        id: "idm-2",
+        name: "Warp Algorithmic",
+        chords: ["A Min9", "F# m7b5", "F Maj9", "E 7alt", "D Min9", "B m7b5", "E 7b9", "A Min9"]
+      },
+      {
+        id: "idm-3",
+        name: "Glitch Polyrhythm",
+        chords: ["D Min9", "B m7b5", "Bb Maj9", "A 7alt", "G Min9", "E m7b5", "A 7b9", "D Min9"]
+      },
+      {
+        id: "idm-4",
+        name: "Microhouse Glitch",
+        chords: ["F Maj9", "Ab Maj9", "B m7b5", "E 7b9", "A Min9", "C Maj9", "D m7b5", "G 7alt"]
+      },
+      {
+        id: "idm-5",
+        name: "Experimental Drone",
+        chords: ["G Min9", "E m7b5", "Eb Maj9", "D 7alt", "C Min9", "A m7b5", "D 7b9", "G Min9"]
+      },
+      {
+        id: "idm-6",
+        name: "Quantum Shift",
+        chords: ["Eb Maj9", "F# Maj9", "A m7b5", "D 7b9", "G Min9", "Bb Maj9", "C# Dim7", "D 7alt"]
+      },
+      {
+        id: "idm-7",
+        name: "Modular Synthesis",
+        chords: ["B Min9", "G# m7b5", "G Maj9", "F# 7alt", "E Min9", "C# m7b5", "F# 7b9", "B Min9"]
+      },
+      {
+        id: "idm-8",
+        name: "Deconstructed Grid",
+        chords: ["E Min9", "C# m7b5", "C Maj9", "B 7alt", "A Min9", "F# m7b5", "B 7b9", "E Min9"]
+      }
+    ]
+  },
+  {
+    id: "jazz",
+    name: "Jazz & Fusion",
+    description: "Sophisticated Coltrane shifts, altered dominants, and rich 2-5-1 turnarounds",
+    icon: "🎷",
+    progressions: [
+      {
+        id: "jazz-1",
+        name: "Coltrane Giant Steps",
+        chords: ["B Maj7", "D 7", "G Maj7", "Bb 7", "Eb Maj7", "A m7b5", "D 7b9", "G Maj9"]
+      },
+      {
+        id: "jazz-2",
+        name: "Miles Davis Modal",
+        chords: ["D Min9", "G 9", "E Min9", "A 7b9", "D Min9", "G 7alt", "C Maj9", "A 7#9"]
+      },
+      {
+        id: "jazz-3",
+        name: "Fusion Expressway",
+        chords: ["F Maj9", "E 7alt", "A Min9", "D 9", "D Min9", "G 7b9", "C Maj9", "C 7alt"]
+      },
+      {
+        id: "jazz-4",
+        name: "Bebop Turnaround",
         chords: ["C Maj9", "A 7b9", "D Min9", "G 9", "E Min9", "A 7#9", "D Min9", "G 7b9"]
       },
       {
-        id: "neosoul-4",
-        name: "Silk & Espresso",
+        id: "jazz-5",
+        name: "Midnight Blue",
+        chords: ["C Min9", "F 9", "Bb Maj9", "Eb Maj9", "A m7b5", "D 7b9", "G Min9", "G 7alt"]
+      },
+      {
+        id: "jazz-6",
+        name: "Birdland Groove",
         chords: ["Eb Maj9", "C 7b9", "F Min9", "Bb 9", "G Min9", "C 7alt", "F Min9", "Bb 7b9"]
       },
       {
-        id: "neosoul-5",
-        name: "Midnight Bourbon",
+        id: "jazz-7",
+        name: "Spanish Key",
+        chords: ["A Min9", "Bb Maj9", "A Min9", "D 9", "F Maj9", "E 7b9", "A Min9", "E 7#9"]
+      },
+      {
+        id: "jazz-8",
+        name: "Weather Report",
+        chords: ["G Min9", "C 9", "F Maj9", "D 7b9", "G Min9", "C 7b9", "F Maj9", "A 7alt"]
+      }
+    ]
+  },
+  {
+    id: "rnb",
+    name: "R&B & Neo-Soul",
+    description: "Warm, velvety minor 9ths, altered dominants, and smooth sensual voicings",
+    icon: "🎤",
+    progressions: [
+      {
+        id: "rnb-1",
+        name: "Velvet Groove",
+        chords: ["D Min9", "G 9", "C Maj9", "A 7b9", "F Maj9", "E 7#9", "A Min9", "D 9"]
+      },
+      {
+        id: "rnb-2",
+        name: "Slow Jam Rain",
+        chords: ["F Maj9", "E 7b9", "A Min9", "D 9", "D Min9", "G 7sus4", "C Maj9", "C 7b9"]
+      },
+      {
+        id: "rnb-3",
+        name: "Silk Candlelight",
+        chords: ["C Maj9", "A 7b9", "D Min9", "G 9", "E Min9", "A 7#9", "D Min9", "G 7b9"]
+      },
+      {
+        id: "rnb-4",
+        name: "Honey & Wine",
+        chords: ["Eb Maj9", "C 7b9", "F Min9", "Bb 9", "G Min9", "C 7alt", "F Min9", "Bb 7b9"]
+      },
+      {
+        id: "rnb-5",
+        name: "Midnight Lounge",
         chords: ["A Min9", "D 9", "F Maj9", "E 7b9", "A Min9", "C 9", "F Maj9", "E 7#9"]
       },
       {
-        id: "neosoul-6",
-        name: "Smoke & Honey",
+        id: "rnb-6",
+        name: "Soulful Dusk",
         chords: ["G Min9", "C 9", "F Maj9", "D 7b9", "G Min9", "C 7b9", "F Maj9", "A 7b9"]
       },
       {
-        id: "neosoul-7",
-        name: "Satin Sheets",
+        id: "rnb-7",
+        name: "Quiet Storm",
         chords: ["D Min9", "G 7b9", "E Min9", "A 7b9", "D Min9", "G 9", "C Maj9", "A 7#9"]
       },
       {
-        id: "neosoul-8",
-        name: "Urban Solitude",
+        id: "rnb-8",
+        name: "Urban Serenade",
         chords: ["F Maj9", "E Min9", "A Min9", "D 9", "F Maj9", "G 7sus4", "C Maj9", "E 7b9"]
       }
     ]
   },
   {
-    id: "cyberpunk",
-    name: "Cyberpunk Synthwave",
-    description: "High-octane synth dystopia with augmented chords, power suspensions, and minor shifts",
-    icon: "⚡",
+    id: "hiphop",
+    name: "Hip-Hop & Lo-Fi",
+    description: "Vinyl boom-bap, mellow chillhop 7ths, and relaxed sample-style progressions",
+    icon: "🌊",
     progressions: [
       {
-        id: "cyberpunk-1",
-        name: "Blade Runner Dusk",
-        chords: ["A Min", "F Maj", "D Sus4", "E Aug", "A Min", "C Maj", "D Min9", "E 7b9"]
+        id: "hiphop-1",
+        name: "Vinyl Scratch",
+        chords: ["C Maj7", "A Min9", "D Min9", "G 7b9", "E Min9", "A Min9", "F Maj9", "G 7sus4"]
       },
       {
-        id: "cyberpunk-2",
-        name: "Neon Overdrive",
-        chords: ["C Min", "Ab Maj", "F Min", "G Aug", "C Min", "Eb Maj", "F Min9", "G 7#9"]
+        id: "hiphop-2",
+        name: "Rainy Attic",
+        chords: ["F Maj9", "G 9", "E Min9", "A Min9", "D Min9", "G 7b9", "C Maj9", "C Maj9"]
       },
       {
-        id: "cyberpunk-3",
-        name: "Chrome Citadel",
-        chords: ["D Min", "Bb Maj", "G Min", "A Aug", "D Min", "F Maj", "G 9", "A 7b9"]
+        id: "hiphop-3",
+        name: "Midnight Tape",
+        chords: ["D Min9", "G 7b9", "C Maj9", "A Min9", "D Min9", "E Min9", "F Maj9", "G 7alt"]
       },
       {
-        id: "cyberpunk-4",
-        name: "Synthetic Dreamer",
-        chords: ["E Min", "C Maj", "A Min", "B Aug", "E Min", "G Maj", "A Min9", "B 7b9"]
+        id: "hiphop-4",
+        name: "Sunset Chillhop",
+        chords: ["Eb Maj9", "C Min9", "F Min9", "Bb 9", "G Min9", "C Min9", "F Min9", "Bb 7b9"]
       },
       {
-        id: "cyberpunk-5",
-        name: "Dystopian Highway",
-        chords: ["G Min", "Eb Maj", "C Min", "D Aug", "G Min", "Bb Maj", "C Min9", "D 7#9"]
+        id: "hiphop-5",
+        name: "Coffee Shop Beat",
+        chords: ["A Min9", "D Min9", "G 7b9", "C Maj9", "F Maj9", "B m7b5", "E 7b9", "A Min9"]
       },
       {
-        id: "cyberpunk-6",
-        name: "Neural Interface",
-        chords: ["B Min", "G Maj", "E Min", "F# Aug", "B Min", "D Maj", "E Min9", "F# 7b9"]
+        id: "hiphop-6",
+        name: "Mellow Dust",
+        chords: ["F Maj9", "E Min9", "D Min9", "C Maj9", "F Maj9", "E Min9", "D Min9", "G 7sus4"]
       },
       {
-        id: "cyberpunk-7",
-        name: "Tokyo After Dark",
-        chords: ["F Min", "Db Maj", "Bb Min", "C Aug", "F Min", "Ab Maj", "Bb Min9", "C 7b9"]
+        id: "hiphop-7",
+        name: "Lo-Fi Horizons",
+        chords: ["C Maj9", "E Min9", "F Maj9", "G 9", "A Min9", "D Min9", "F Maj9", "G 7b9"]
       },
       {
-        id: "cyberpunk-8",
-        name: "Hyperdrive",
-        chords: ["A Min", "G Sus4", "F Maj9", "E 7b9", "A Min", "D Sus2", "F Maj9", "E Aug"]
+        id: "hiphop-8",
+        name: "Cozy Room Tape",
+        chords: ["G Maj9", "E Min9", "A Min9", "D 9", "B Min9", "E Min9", "C Maj9", "D 7b9"]
       }
     ]
   },
   {
-    id: "euphoric",
-    name: "Euphoric Sunshine",
-    description: "Uplifting, warm acoustic resonance with open add9 and major 6th sparkle",
-    icon: "🌿",
-    progressions: [
-      {
-        id: "euphoric-1",
-        name: "Golden Meadow",
-        chords: ["C Add9", "G Sus4", "A Min9", "F Maj6", "C Add9", "G 9", "D Min9", "G 7sus4"]
-      },
-      {
-        id: "euphoric-2",
-        name: "Wildflower Hill",
-        chords: ["G Add9", "D Sus4", "E Min9", "C Maj6", "G Add9", "D 9", "C Maj9", "G Add9"]
-      },
-      {
-        id: "euphoric-3",
-        name: "Ocean Breeze",
-        chords: ["D Add9", "A Sus4", "B Min9", "G Maj6", "D Add9", "A 9", "G Maj9", "D Add9"]
-      },
-      {
-        id: "euphoric-4",
-        name: "Sunrise Festival",
-        chords: ["F Maj6", "C Add9", "G Sus4", "A Min7", "F Maj9", "G 9", "C Add9", "C Maj6"]
-      },
-      {
-        id: "euphoric-5",
-        name: "Mountain Stream",
-        chords: ["A Min7", "F Maj6", "C Add9", "G Sus4", "A Min9", "F Maj9", "D Sus2", "G 9"]
-      },
-      {
-        id: "euphoric-6",
-        name: "Spring Awakening",
-        chords: ["Eb Add9", "Bb Sus4", "C Min9", "Ab Maj6", "Eb Add9", "Bb 9", "Ab Maj9", "Eb Add9"]
-      },
-      {
-        id: "euphoric-7",
-        name: "Highland Dawn",
-        chords: ["E Min7", "C Maj6", "G Add9", "D Sus4", "E Min9", "C Maj9", "A Sus2", "D 9"]
-      },
-      {
-        id: "euphoric-8",
-        name: "Coastal Sunset",
-        chords: ["C Maj6", "F Maj9", "A Min9", "G Sus4", "C Add9", "F Maj6", "D Min9", "G 7sus4"]
-      }
-    ]
-  },
-  {
-    id: "spiritual",
-    name: "Modal Jazz & Spiritual",
-    description: "Transcendent modal harmonies, half-diminished movement, and mystical altered cadences",
+    id: "ambient",
+    name: "Ambient & Cinematic",
+    description: "Expansive film scoring, cosmic floating intervals, and deep space textures",
     icon: "🌌",
     progressions: [
       {
-        id: "spiritual-1",
-        name: "Astral Awakening",
-        chords: ["C Maj9", "Eb Maj9", "F# m7b5", "B 7b9", "E Maj9", "G Maj9", "Bb m7b5", "Eb 7b9"]
+        id: "ambient-1",
+        name: "Interstellar Drift",
+        chords: ["C Maj9", "F Maj9", "A Min9", "G 7sus4", "C Sus2", "F Maj9", "D Min9", "G 9"]
       },
       {
-        id: "spiritual-2",
-        name: "Celestial Gate",
-        chords: ["A Min9", "F# m7b5", "F Maj9", "E 7alt", "D Min9", "B m7b5", "E 7b9", "A Min9"]
+        id: "ambient-2",
+        name: "Event Horizon",
+        chords: ["A Min", "F# m7b5", "F Maj7", "E 7b9", "D Min9", "B m7b5", "E 7#9", "A Min"]
       },
       {
-        id: "spiritual-3",
-        name: "Mystic Horizon",
-        chords: ["D Min9", "B m7b5", "Bb Maj9", "A 7alt", "G Min9", "E m7b5", "A 7b9", "D Min9"]
+        id: "ambient-3",
+        name: "Deep Cosmos",
+        chords: ["C Min9", "Ab Maj7", "D m7b5", "G 7b9", "Eb Maj7", "F Min9", "D Dim7", "G 7alt"]
       },
       {
-        id: "spiritual-4",
-        name: "Sacred Geometry",
-        chords: ["F Maj9", "Ab Maj9", "B m7b5", "E 7b9", "A Min9", "C Maj9", "D m7b5", "G 7alt"]
+        id: "ambient-4",
+        name: "Solar Flare",
+        chords: ["G Maj9", "C Maj9", "E Min9", "D Sus4", "G Sus2", "C Maj9", "A Min9", "D 9"]
       },
       {
-        id: "spiritual-5",
-        name: "Etheric Portal",
-        chords: ["G Min9", "E m7b5", "Eb Maj9", "D 7alt", "C Min9", "A m7b5", "D 7b9", "G Min9"]
+        id: "ambient-5",
+        name: "Subterranean World",
+        chords: ["D Min9", "Bb Maj7", "E m7b5", "A 7b9", "G Min9", "Eb Maj7", "C# Dim7", "A 7#9"]
       },
       {
-        id: "spiritual-6",
-        name: "Transcendence",
-        chords: ["Eb Maj9", "F# Maj9", "A m7b5", "D 7b9", "G Min9", "Bb Maj9", "C# Dim7", "D 7alt"]
+        id: "ambient-6",
+        name: "Starlight Canopy",
+        chords: ["D Maj9", "G Maj9", "B Min9", "A Sus4", "D Add9", "G Maj9", "E Min9", "A 7sus4"]
       },
       {
-        id: "spiritual-7",
-        name: "Cosmic Balance",
-        chords: ["B Min9", "G# m7b5", "G Maj9", "F# 7alt", "E Min9", "C# m7b5", "F# 7b9", "B Min9"]
+        id: "ambient-7",
+        name: "Endless Abyss",
+        chords: ["E Min9", "C Maj7", "F# m7b5", "B 7b9", "A Min9", "D 9", "C Maj7", "B 7alt"]
       },
       {
-        id: "spiritual-8",
-        name: "Dimensional Shift",
-        chords: ["E Min9", "C# m7b5", "C Maj9", "B 7alt", "A Min9", "F# m7b5", "B 7b9", "E Min9"]
+        id: "ambient-8",
+        name: "Aurora Borealis",
+        chords: ["Bb Maj9", "Eb Maj9", "G Min9", "F 7sus4", "Bb Add9", "Eb Maj9", "C Min9", "F 9"]
+      }
+    ]
+  },
+  {
+    id: "techno",
+    name: "Techno & Synthwave",
+    description: "Industrial synth pulse, retrowave highways, and dark electronic progressions",
+    icon: "🏎️",
+    progressions: [
+      {
+        id: "techno-1",
+        name: "Outrun Highway",
+        chords: ["A Min", "F Maj", "D Sus4", "E Aug", "A Min", "C Maj", "D Min9", "E 7b9"]
+      },
+      {
+        id: "techno-2",
+        name: "Berghain Basement",
+        chords: ["C Min", "Ab Maj", "F Min", "G Aug", "C Min", "Eb Maj", "F Min9", "G 7#9"]
+      },
+      {
+        id: "techno-3",
+        name: "Cyberpunk Overdrive",
+        chords: ["D Min", "Bb Maj", "G Min", "A Aug", "D Min", "F Maj", "G 9", "A 7b9"]
+      },
+      {
+        id: "techno-4",
+        name: "Retrowave Sunset",
+        chords: ["E Min", "C Maj", "A Min", "B Aug", "E Min", "G Maj", "A Min9", "B 7b9"]
+      },
+      {
+        id: "techno-5",
+        name: "Melodic Techno Sunrise",
+        chords: ["G Min", "Eb Maj", "C Min", "D Aug", "G Min", "Bb Maj", "C Min9", "D 7#9"]
+      },
+      {
+        id: "techno-6",
+        name: "Neon Grid",
+        chords: ["B Min", "G Maj", "E Min", "F# Aug", "B Min", "D Maj", "E Min9", "F# 7b9"]
+      },
+      {
+        id: "techno-7",
+        name: "Industrial Darkness",
+        chords: ["F Min", "Db Maj", "Bb Min", "C Aug", "F Min", "Ab Maj", "Bb Min9", "C 7b9"]
+      },
+      {
+        id: "techno-8",
+        name: "Velocity Pulse",
+        chords: ["A Min", "G Sus4", "F Maj9", "E 7b9", "A Min", "D Sus2", "F Maj9", "E Aug"]
       }
     ]
   }
