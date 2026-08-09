@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { ChordSlot } from './components/ChordSlot';
 import { PianoKeyboard } from './components/PianoKeyboard';
-import { audioService } from './services/audioService';
-import { DEFAULT_PROGRESSION, PRESET_PROGRESSIONS, AVAILABLE_CHORDS } from './constants';
-import { Play, Square, Download, Activity, Music2, Sparkles, Shuffle } from 'lucide-react';
+import { audioService, SYNTH_TONE_OPTIONS } from './services/audioService';
+import { DEFAULT_PROGRESSION, VIBE_GROUPS, AVAILABLE_CHORDS } from './constants';
+import { SynthToneId } from './types';
+import { Play, Square, Download, Activity, Music2, Sparkles, Shuffle, SlidersHorizontal } from 'lucide-react';
 import * as Tone from 'tone';
 import { Midi } from '@tonejs/midi';
 
@@ -21,7 +22,11 @@ const App: React.FC = () => {
   const [playingIndex, setPlayingIndex] = useState<number | null>(null);
   const [playbackMode, setPlaybackMode] = useState<PlaybackMode>(null);
   const [bpm, setBpm] = useState(90);
-  const [selectedPresetName, setSelectedPresetName] = useState<string>('');
+  const [selectedVibeId, setSelectedVibeId] = useState<string>('pop');
+  const [selectedProgressionId, setSelectedProgressionId] = useState<string>('pop-1');
+  const [vibeIndices, setVibeIndices] = useState<Record<string, number>>({ pop: 0 });
+  const [selectedToneId, setSelectedToneId] = useState<SynthToneId>('rhodes');
+
   
   // Refs for transport loop and timeouts
   const stepRef = useRef<number>(0);
@@ -40,26 +45,71 @@ const App: React.FC = () => {
     audioService.playChord(newChord, "8n");
   };
 
-  const handlePresetSelect = (presetName: string) => {
-    setSelectedPresetName(presetName);
-    const preset = PRESET_PROGRESSIONS.find(p => p.name === presetName);
-    if (preset) {
-      stopAll();
-      setProgression([...preset.chords]);
-      audioService.playChord(preset.chords[0], "4n");
+  const handleVibeSelect = (val: string) => {
+    if (!val) return;
+    stopAll();
+
+    if (val.startsWith('vibe:')) {
+      const vibeId = val.replace('vibe:', '');
+      const vibeGroup = VIBE_GROUPS.find(v => v.id === vibeId);
+      if (vibeGroup) {
+        setSelectedVibeId(vibeId);
+        const currentIndex = vibeIndices[vibeId] ?? 0;
+        const prog = vibeGroup.progressions[currentIndex];
+        setSelectedProgressionId(prog.id);
+        setProgression([...prog.chords]);
+        audioService.playChord(prog.chords[0], "4n");
+      }
+    } else if (val.startsWith('preset:')) {
+      const progId = val.replace('preset:', '');
+      for (const vibe of VIBE_GROUPS) {
+        const idx = vibe.progressions.findIndex(p => p.id === progId);
+        if (idx !== -1) {
+          const prog = vibe.progressions[idx];
+          setSelectedVibeId(vibe.id);
+          setSelectedProgressionId(prog.id);
+          setVibeIndices(prev => ({ ...prev, [vibe.id]: idx }));
+          setProgression([...prog.chords]);
+          audioService.playChord(prog.chords[0], "4n");
+          break;
+        }
+      }
     }
   };
 
-  const randomizeProgression = () => {
-    stopAll();
-    setSelectedPresetName('');
-    const shuffled = Array.from({ length: 8 }, () => {
-      const randomIndex = Math.floor(Math.random() * AVAILABLE_CHORDS.length);
-      return AVAILABLE_CHORDS[randomIndex];
-    });
-    setProgression(shuffled);
-    audioService.playChord(shuffled[0], "4n");
+  const handleToneChange = (toneId: SynthToneId) => {
+    setSelectedToneId(toneId);
+    audioService.setSynthTone(toneId);
+    // Play quick preview note/chord with new synth tone
+    audioService.playChord(progression[0], "8n");
   };
+
+  const randomizeVibeProgression = () => {
+    stopAll();
+    
+    let targetVibeId = selectedVibeId;
+    if (!targetVibeId) {
+      targetVibeId = VIBE_GROUPS[0].id;
+      setSelectedVibeId(targetVibeId);
+    }
+
+    const vibeGroup = VIBE_GROUPS.find(v => v.id === targetVibeId) || VIBE_GROUPS[0];
+    const currentIndex = vibeIndices[targetVibeId] ?? 0;
+    const nextIndex = (currentIndex + 1) % vibeGroup.progressions.length;
+
+    setVibeIndices(prev => ({ ...prev, [targetVibeId]: nextIndex }));
+    
+    const nextProg = vibeGroup.progressions[nextIndex];
+    setSelectedProgressionId(nextProg.id);
+    setProgression([...nextProg.chords]);
+    audioService.playChord(nextProg.chords[0], "4n");
+  };
+
+  const activeVibeGroup = VIBE_GROUPS.find(v => v.id === selectedVibeId);
+  const activeProgression = activeVibeGroup?.progressions.find(p => p.id === selectedProgressionId);
+  const activeProgressionIndex = activeVibeGroup && activeProgression 
+    ? activeVibeGroup.progressions.findIndex(p => p.id === activeProgression.id)
+    : 0;
 
   const playSingleChord = async (index: number) => {
     // Stop playback if running
@@ -270,23 +320,41 @@ const App: React.FC = () => {
           <p className="text-neutral-400 text-xs font-mono mt-1 tracking-wide">
             8-Step Sequential Chord Arranger & Voice Leading Engine
           </p>
+          {activeVibeGroup && activeProgression && (
+            <div className="mt-2.5 inline-flex items-center gap-2 px-3 py-1 bg-orange-500/10 border border-orange-500/20 rounded-full text-xs font-mono text-orange-400 shadow-sm">
+              <span className="font-bold">{activeVibeGroup.icon} {activeVibeGroup.name}</span>
+              <span className="text-neutral-600">•</span>
+              <span className="text-neutral-200 font-semibold">{activeProgression.name}</span>
+              <span className="bg-orange-500/20 px-1.5 py-0.5 rounded text-[10px] text-orange-300 font-bold ml-1">
+                {activeProgressionIndex + 1}/{activeVibeGroup.progressions.length}
+              </span>
+            </div>
+          )}
         </div>
 
         {/* Global Controls */}
         <div className="flex flex-wrap items-center justify-center gap-3 bg-neutral-900/80 p-3 rounded-2xl border border-white/[0.08] shadow-2xl backdrop-blur-md">
-             {/* Preset Selector */}
+             {/* Vibe & Progression Selector */}
              <div className="flex items-center gap-2">
                <div className="relative">
                  <select
-                   value={selectedPresetName}
-                   onChange={(e) => handlePresetSelect(e.target.value)}
-                   className="appearance-none bg-neutral-950 text-neutral-200 border border-white/[0.08] hover:border-orange-500/40 rounded-lg py-2 pl-8 pr-7 text-xs font-mono font-semibold focus:outline-none focus:ring-1 focus:ring-orange-500 cursor-pointer transition-colors"
+                   value={selectedProgressionId ? `preset:${selectedProgressionId}` : (selectedVibeId ? `vibe:${selectedVibeId}` : '')}
+                   onChange={(e) => handleVibeSelect(e.target.value)}
+                   className="appearance-none bg-neutral-950 text-neutral-200 border border-white/[0.08] hover:border-orange-500/40 rounded-lg py-2 pl-8 pr-7 text-xs font-mono font-semibold focus:outline-none focus:ring-1 focus:ring-orange-500 cursor-pointer transition-colors max-w-[220px] sm:max-w-none truncate"
+                   title="Select a harmonic vibe or progression"
                  >
-                   <option value="" disabled>✨ HARMONIC PRESETS</option>
-                   {PRESET_PROGRESSIONS.map(p => (
-                     <option key={p.name} value={p.name} className="bg-neutral-900 text-neutral-200">
-                       {p.name} ({p.vibe})
-                     </option>
+                   <option value="" disabled>✨ HARMONIC VIBES</option>
+                   {VIBE_GROUPS.map(vibe => (
+                     <optgroup key={vibe.id} label={`${vibe.icon} ${vibe.name}`} className="bg-neutral-900 text-orange-400 font-bold">
+                       <option value={`vibe:${vibe.id}`} className="bg-neutral-900 text-neutral-100 font-semibold">
+                         {vibe.icon} All {vibe.name} (Cycle 1-{vibe.progressions.length})
+                       </option>
+                       {vibe.progressions.map((p, idx) => (
+                         <option key={p.id} value={`preset:${p.id}`} className="bg-neutral-950 text-neutral-300 font-normal">
+                           &nbsp;&nbsp;{idx + 1}. {p.name}
+                         </option>
+                       ))}
+                     </optgroup>
                    ))}
                  </select>
                  <Sparkles size={13} className="absolute left-2.5 top-2.5 text-orange-500 pointer-events-none" />
@@ -297,12 +365,37 @@ const App: React.FC = () => {
                  </div>
                </div>
                <button
-                 onClick={randomizeProgression}
-                 className="p-2 rounded-lg bg-neutral-950 hover:bg-neutral-850 text-neutral-400 hover:text-orange-400 border border-white/[0.08] hover:border-orange-500/40 transition-all"
-                 title="Randomize 8-chord progression"
+                 onClick={randomizeVibeProgression}
+                 className="p-2 rounded-lg bg-neutral-950 hover:bg-neutral-850 text-neutral-400 hover:text-orange-400 border border-white/[0.08] hover:border-orange-500/40 transition-all flex items-center justify-center"
+                 title={activeVibeGroup ? `Cycle next chord progression in "${activeVibeGroup.name}" (${activeProgressionIndex + 1}/${activeVibeGroup.progressions.length})` : "Cycle vibe chord progression"}
                >
                  <Shuffle size={14} />
                </button>
+             </div>
+
+
+             <div className="w-[1px] h-6 bg-white/[0.08] hidden md:block"></div>
+
+             {/* Synth Tone Preset Selector */}
+             <div className="relative">
+               <select
+                 value={selectedToneId}
+                 onChange={(e) => handleToneChange(e.target.value as SynthToneId)}
+                 className="appearance-none bg-neutral-950 text-neutral-200 border border-white/[0.08] hover:border-orange-500/40 rounded-lg py-2 pl-8 pr-7 text-xs font-mono font-semibold focus:outline-none focus:ring-1 focus:ring-orange-500 cursor-pointer transition-colors"
+                 title="Select synth sound model"
+               >
+                 {SYNTH_TONE_OPTIONS.map(t => (
+                   <option key={t.id} value={t.id} className="bg-neutral-900 text-neutral-200">
+                     🎹 {t.name}
+                   </option>
+                 ))}
+               </select>
+               <SlidersHorizontal size={13} className="absolute left-2.5 top-2.5 text-orange-500 pointer-events-none" />
+               <div className="absolute right-2.5 top-3 pointer-events-none text-neutral-500">
+                 <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                 </svg>
+               </div>
              </div>
 
              <div className="w-[1px] h-6 bg-white/[0.08] hidden md:block"></div>
