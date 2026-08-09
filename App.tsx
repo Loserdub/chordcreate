@@ -22,9 +22,9 @@ const App: React.FC = () => {
   const [playingIndex, setPlayingIndex] = useState<number | null>(null);
   const [playbackMode, setPlaybackMode] = useState<PlaybackMode>(null);
   const [bpm, setBpm] = useState(90);
-  const [selectedVibeId, setSelectedVibeId] = useState<string>('pop');
-  const [selectedProgressionId, setSelectedProgressionId] = useState<string>('pop-1');
-  const [vibeIndices, setVibeIndices] = useState<Record<string, number>>({ pop: 0 });
+  const [selectedVibeId, setSelectedVibeId] = useState<string>('ether');
+  const [selectedProgressionId, setSelectedProgressionId] = useState<string>('ether-1');
+  const [vibeIndices, setVibeIndices] = useState<Record<string, number>>({ ether: 0 });
   const [selectedToneId, setSelectedToneId] = useState<SynthToneId>('rhodes');
 
   
@@ -320,16 +320,6 @@ const App: React.FC = () => {
           <p className="text-neutral-400 text-xs font-mono mt-1 tracking-wide">
             8-Step Sequential Chord Arranger & Voice Leading Engine
           </p>
-          {activeVibeGroup && activeProgression && (
-            <div className="mt-2.5 inline-flex items-center gap-2 px-3 py-1 bg-orange-500/10 border border-orange-500/20 rounded-full text-xs font-mono text-orange-400 shadow-sm">
-              <span className="font-bold">{activeVibeGroup.icon} {activeVibeGroup.name}</span>
-              <span className="text-neutral-600">•</span>
-              <span className="text-neutral-200 font-semibold">{activeProgression.name}</span>
-              <span className="bg-orange-500/20 px-1.5 py-0.5 rounded text-[10px] text-orange-300 font-bold ml-1">
-                {activeProgressionIndex + 1}/{activeVibeGroup.progressions.length}
-              </span>
-            </div>
-          )}
         </div>
 
         {/* Global Controls */}
