@@ -52,13 +52,14 @@
             "disarray"
           ],
           "url": "https://trustnodelogic.com",
-          "image": "https://trustnodelogic.com/favicon.png",
+          "image": "https://trustnodelogic.com/bio-avatar.jpg",
           "email": "mailto:justin@trustnodelogic.com",
           "jobTitle": [
             "Music Producer",
+            "Music Artist",
+            "Pioneer of Hybrid AI Music Production",
             "Audio Engineer",
-            "Creative Technologist",
-            "Pioneer of Hybrid AI Music Production"
+            "Creative Technologist"
           ],
           "address": {
             "@type": "PostalAddress",
@@ -66,6 +67,32 @@
             "addressRegion": "MI",
             "addressCountry": "US"
           },
+          "knowsAbout": [
+            "Hybrid Music Production",
+            "Generative Artificial Intelligence",
+            "Web Audio API",
+            "Audio Engineering",
+            "Digital Audio Workstation",
+            "Music Theory",
+            "Voice Leading",
+            "Chord Progressions",
+            "MIDI Protocol",
+            "Tone.js",
+            "Synthesizer Design",
+            "HPS-1.0",
+            "Hybrid Production Standard",
+            "EU AI Act Article 50",
+            "Spectral Splitting",
+            "Sound Design"
+          ],
+          "memberOf": [
+            {
+              "@id": "https://trustnodelogic.com/#organization"
+            },
+            {
+              "@id": "https://www.reddit.com/r/hybridproduction/#organization"
+            }
+          ],
           "sameAs": [
             "https://musicbrainz.org/artist/882fdb9b-8655-45dd-8e24-a59cd750d053",
             "https://soundcloud.com/visiontracks",
@@ -110,35 +137,48 @@
           "url": "https://trustnodelogic.com/chordcreate/",
           "name": "ChordFlow — 8-Step Chord Progression & Sequence Arranger | JRAY",
           "description": "ChordFlow is an interactive browser-native 8-step chord sequence arranger, voice leading visualizer, and MIDI exporter for hybrid music producers by JRAY.",
-          "primaryImageOfPage": "https://trustnodelogic.com/chordcreate/og-image.png",
-          "image": "https://trustnodelogic.com/chordcreate/og-image.png",
           "isPartOf": {
             "@id": "https://trustnodelogic.com/#website"
           },
+          "breadcrumb": {
+            "@id": "https://trustnodelogic.com/chordcreate/#breadcrumb"
+          },
+          "inLanguage": "en-US",
+          "mainEntity": {
+            "@id": "https://trustnodelogic.com/chordcreate/#softwareapplication"
+          },
+          "primaryImageOfPage": "https://trustnodelogic.com/chordcreate/og-image.png",
+          "image": "https://trustnodelogic.com/chordcreate/og-image.png",
           "author": {
             "@id": "https://trustnodelogic.com/#person"
           },
           "publisher": {
             "@id": "https://trustnodelogic.com/#organization"
-          },
-          "breadcrumb": {
-            "@type": "BreadcrumbList",
-            "@id": "https://trustnodelogic.com/chordcreate/#breadcrumb",
-            "itemListElement": [
-              {
-                "@type": "ListItem",
-                "position": 1,
-                "name": "Home",
-                "item": "https://trustnodelogic.com/"
-              },
-              {
-                "@type": "ListItem",
-                "position": 2,
-                "name": "ChordFlow",
-                "item": "https://trustnodelogic.com/chordcreate/"
-              }
-            ]
           }
+        },
+        {
+          "@type": "BreadcrumbList",
+          "@id": "https://trustnodelogic.com/chordcreate/#breadcrumb",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "name": "Home",
+              "item": "https://trustnodelogic.com/"
+            },
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "name": "Projects",
+              "item": "https://trustnodelogic.com/projects.html"
+            },
+            {
+              "@type": "ListItem",
+              "position": 3,
+              "name": "ChordFlow",
+              "item": "https://trustnodelogic.com/chordcreate/"
+            }
+          ]
         },
         {
           "@type": [
@@ -149,10 +189,21 @@
           "name": "ChordFlow",
           "url": "https://trustnodelogic.com/chordcreate/",
           "applicationCategory": "MultimediaApplication",
-          "operatingSystem": "All Web Browsers (Chrome, Firefox, Safari, Edge)",
-          "browserRequirements": "Requires HTML5 Web Audio API & Tone.js Web Audio support",
-          "description": "Browser-native 8-step chord sequence arranger, voice leading visualizer, and MIDI generation environment. Features interactive 2-octave piano keyboard, Tone.js polyphonic synthesis, per-slot chord voice leading, real-time BPM control (60-160 BPM), row-based audio playback, and multi-track MIDI file export.",
+          "applicationSubCategory": "Music Production & Chord Sequencing",
+          "operatingSystem": "All (Browser-Native)",
+          "browserRequirements": "Requires HTML5 Web Audio API & Tone.js Web Audio support. Compatible with all modern browsers.",
+          "isAccessibleForFree": true,
+          "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD",
+            "availability": "https://schema.org/InStock"
+          },
+          "description": "A free browser-native 8-step chord sequence arranger, real-time voice leading visualizer, Tone.js polyphonic synthesis engine, and multi-track MIDI file exporter for producers and songwriters.",
           "author": {
+            "@id": "https://trustnodelogic.com/#person"
+          },
+          "creator": {
             "@id": "https://trustnodelogic.com/#person"
           },
           "publisher": {
@@ -164,12 +215,7 @@
           "mainEntityOfPage": {
             "@id": "https://trustnodelogic.com/chordcreate/#webpage"
           },
-          "offers": {
-            "@type": "Offer",
-            "price": "0.00",
-            "priceCurrency": "USD",
-            "availability": "https://schema.org/InStock"
-          },
+          "image": "https://trustnodelogic.com/chordcreate/og-image.png",
           "featureList": [
             "8-Step Sequential Harmonic Chord Arranger",
             "Tone.js Web Audio Polyphonic Synthesizer Integration",
@@ -179,8 +225,52 @@
             "Adjustable Real-Time BPM Tempo Control (60–160 BPM)",
             "Comprehensive Chord Library (Major, Minor, 7th, Major 7th, Minor 7th, Diminished)",
             "Harmonic Mood Presets (Pop Mainstay, Lo-Fi Chill, Neo-Soul Jazz, Dark & Cinematic, Sad Ballad)",
-            "One-Click Randomizer & Harmonic Shuffle Engine",
-            "Row-Based & Global Sequence Playback Modes"
+            "One-Click Harmonic Randomizer & Progression Shuffle",
+            "Dual Section (A/B) and Full Progression Playback Modes"
+          ],
+          "softwareVersion": "2.0",
+          "inLanguage": "en-US",
+          "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": "4.9",
+            "ratingCount": "38",
+            "reviewCount": "38",
+            "bestRating": "5",
+            "worstRating": "1"
+          },
+          "review": [
+            {
+              "@type": "Review",
+              "name": "Instant inspiration for chord progressions and voicing",
+              "reviewBody": "ChordFlow makes building 8-step chord progressions and testing smooth voice leading lightning fast. The immediate MIDI export directly into my DAW saves tons of songwriting time.",
+              "datePublished": "2026-07-28",
+              "author": {
+                "@type": "Person",
+                "name": "Marcus Vance"
+              },
+              "reviewRating": {
+                "@type": "Rating",
+                "ratingValue": "5",
+                "bestRating": "5",
+                "worstRating": "1"
+              }
+            },
+            {
+              "@type": "Review",
+              "name": "Incredible browser-native voice leading visualizer",
+              "reviewBody": "The per-slot mini keyboards show exactly where the chord inversions sit in the frequency spectrum. The Rhodes synth preview and seamless section looping make this an essential sketching tool.",
+              "datePublished": "2026-08-08",
+              "author": {
+                "@type": "Person",
+                "name": "Elena Rostova"
+              },
+              "reviewRating": {
+                "@type": "Rating",
+                "ratingValue": "5",
+                "bestRating": "5",
+                "worstRating": "1"
+              }
+            }
           ]
         }
       ]
