@@ -4,7 +4,7 @@ import { PianoKeyboard } from './components/PianoKeyboard';
 import { audioService, SYNTH_TONE_OPTIONS } from './services/audioService';
 import { DEFAULT_PROGRESSION, VIBE_GROUPS, AVAILABLE_CHORDS } from './constants';
 import { SynthToneId } from './types';
-import { Play, Square, Download, Activity, Music2, Sparkles, Shuffle, SlidersHorizontal } from 'lucide-react';
+import { Play, Square, Download, Music2, Shuffle, SlidersHorizontal, ChevronRight } from 'lucide-react';
 import * as Tone from 'tone';
 import { Midi } from '@tonejs/midi';
 
@@ -271,15 +271,15 @@ const App: React.FC = () => {
         </div>
         
         {/* Row Controls Sidebar */}
-        <div className="flex flex-row md:flex-col justify-center gap-3 min-w-[140px] bg-neutral-950/80 p-4 rounded-xl border border-white/[0.08]">
-             <div className="font-mono text-[10px] font-bold text-neutral-400 uppercase tracking-widest text-center mb-0.5">
-                 ROW 0{rowId}
+        <div className="flex flex-row md:flex-col justify-center gap-2 min-w-[120px] bg-neutral-950/80 p-3 rounded-xl border border-white/[0.08]">
+             <div className="font-mono text-[9px] font-bold text-neutral-600 uppercase tracking-[0.2em] text-center mb-0.5">
+                 SECTION {rowId === 1 ? 'A' : 'B'}
              </div>
              
              <button
                 onClick={() => togglePlayback(rowId === 1 ? 'ROW1' : 'ROW2')}
                 className={`
-                    flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg font-mono text-xs font-bold transition-all border
+                    flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg font-mono text-xs font-bold transition-all border
                     ${(rowId === 1 && playbackMode === 'ROW1') || (rowId === 2 && playbackMode === 'ROW2')
                         ? 'bg-red-500/20 text-red-400 border-red-500/40 hover:bg-red-500/30' 
                         : 'bg-neutral-900 text-neutral-300 border-white/[0.08] hover:border-orange-500/40 hover:text-orange-400 hover:bg-neutral-850'
@@ -287,17 +287,17 @@ const App: React.FC = () => {
                 `}
              >
                 {(rowId === 1 && playbackMode === 'ROW1') || (rowId === 2 && playbackMode === 'ROW2') ? (
-                    <><Square size={13} fill="currentColor"/> STOP</>
+                    <><Square size={12} fill="currentColor"/> STOP</>
                 ) : (
-                    <><Play size={13} fill="currentColor"/> PLAY</>
+                    <><Play size={12} fill="currentColor"/> PLAY</>
                 )}
              </button>
 
              <button
                 onClick={() => exportMidi(startIndex, 4, `row-${rowId}.mid`)}
-                className="flex-1 flex items-center justify-center gap-1.5 px-4 py-2.5 bg-neutral-900 hover:bg-neutral-800 text-neutral-400 hover:text-orange-400 rounded-lg border border-white/[0.08] transition-all font-mono text-[11px] font-semibold"
+                className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-neutral-900 hover:bg-neutral-800 text-neutral-400 hover:text-orange-400 rounded-lg border border-white/[0.08] transition-all font-mono text-[11px] font-semibold"
              >
-                <Download size={13} />
+                <Download size={12} />
                 MIDI
              </button>
         </div>
@@ -310,15 +310,16 @@ const App: React.FC = () => {
       {/* Header */}
       <header className="w-full max-w-6xl mb-8 flex flex-col md:flex-row justify-between items-center gap-6 pb-6 border-b border-white/[0.08]">
         <div className="flex-1 text-center md:text-left">
-          <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-orange-500/10 border border-orange-500/20 text-orange-400 text-[10px] font-mono font-bold tracking-widest uppercase mb-2">
-            <Activity size={12} className="animate-pulse" />
-            HPS-1.0 Certified Audio Tool
+          <div className="inline-flex items-center gap-1.5 mb-3">
+            <span className="font-mono text-[9px] font-bold text-neutral-500 uppercase tracking-[0.2em]">trustnodelogic.com</span>
+            <ChevronRight size={9} className="text-neutral-600" />
+            <span className="font-mono text-[9px] font-bold text-orange-500/80 uppercase tracking-[0.2em]">chordcreate</span>
           </div>
-          <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-orange-400 via-orange-500 to-neutral-200">
-            ChordFlow AI
+          <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-orange-400 via-amber-300 to-neutral-300">
+            ChordFlow
           </h1>
-          <p className="text-neutral-400 text-xs font-mono mt-1 tracking-wide">
-            8-Step Sequential Chord Arranger & Voice Leading Engine
+          <p className="text-neutral-500 text-[11px] font-mono mt-1.5 tracking-wider">
+            8-step chord sequencer &nbsp;·&nbsp; voice leading &nbsp;·&nbsp; MIDI export
           </p>
         </div>
 
@@ -333,7 +334,7 @@ const App: React.FC = () => {
                    className="appearance-none bg-neutral-950 text-neutral-200 border border-white/[0.08] hover:border-orange-500/40 rounded-lg py-2 pl-8 pr-7 text-xs font-mono font-semibold focus:outline-none focus:ring-1 focus:ring-orange-500 cursor-pointer transition-colors max-w-[220px] sm:max-w-none truncate"
                    title="Select a harmonic vibe or progression"
                  >
-                   <option value="" disabled>🎵 MUSIC GENRES & CHORDS</option>
+                   <option value="" disabled>GENRE / MOOD</option>
                    {VIBE_GROUPS.map(vibe => (
                      <optgroup key={vibe.id} label={`${vibe.icon} ${vibe.name}`} className="bg-neutral-900 text-orange-400 font-bold">
                        <option value={`vibe:${vibe.id}`} className="bg-neutral-900 text-neutral-100 font-semibold">
@@ -347,7 +348,7 @@ const App: React.FC = () => {
                      </optgroup>
                    ))}
                  </select>
-                 <Sparkles size={13} className="absolute left-2.5 top-2.5 text-orange-500 pointer-events-none" />
+                 <Music2 size={13} className="absolute left-2.5 top-2.5 text-orange-500 pointer-events-none" />
                  <div className="absolute right-2.5 top-3 pointer-events-none text-neutral-500">
                    <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
@@ -445,13 +446,13 @@ const App: React.FC = () => {
         <div className="bg-neutral-900/40 border border-white/[0.08] rounded-2xl p-5 shadow-2xl backdrop-blur-sm">
             <div className="flex justify-between items-center mb-4">
                 <div className="flex items-center gap-2">
-                    <Music2 size={16} className="text-orange-500" />
-                    <h3 className="text-sm font-mono font-bold text-neutral-200 uppercase tracking-wider">Master Keyboard</h3>
+                    <Music2 size={15} className="text-orange-500" />
+                    <h3 className="text-xs font-mono font-bold text-neutral-300 uppercase tracking-wider">Piano</h3>
                 </div>
-                <div className="font-mono text-xs text-neutral-400 bg-neutral-950 px-3 py-1 rounded-md border border-white/[0.06]">
+                <div className="font-mono text-[10px] text-neutral-500">
                     {playingIndex !== null 
-                        ? `PLAYING: ${progression[playingIndex]} (SLOT 0${playingIndex + 1})` 
-                        : 'INTERACTIVE MODE — CLICK KEYS TO PLAY'}
+                        ? `${progression[playingIndex]}  ·  slot ${playingIndex + 1}` 
+                        : 'click a slot or key to preview'}
                 </div>
             </div>
             
