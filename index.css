@@ -1,43 +1,43 @@
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  --bg-dark: #070709;
-  --surface-dark: #0f0f14;
-  --surface-border: rgba(255, 255, 255, 0.08);
-  --surface-hover: rgba(255, 255, 255, 0.14);
-  --accent-orange: #f97316;
-  --accent-glow: rgba(249, 115, 22, 0.25);
-  --font-mono: 'JetBrains Mono', monospace;
-  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --bg-dark: #1C1A1A;
+  --surface-dark: #272525;
+  --surface-border: rgba(254, 243, 199, 0.08);
+  --surface-hover: rgba(254, 243, 199, 0.14);
+  --accent-amber: #F59E0B;
+  --accent-glow: rgba(245, 158, 11, 0.25);
+  --font-mono: 'IBM Plex Mono', monospace;
+  --font-sans: 'Space Grotesk', system-ui, -apple-system, sans-serif;
 }
 
 body {
   font-family: var(--font-sans);
   background-color: var(--bg-dark);
-  color: #f1f5f9;
+  color: #FEF3C7; /* Cream / Parchment */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 /* Custom hairline borders */
 .hairline-border {
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(254, 243, 199, 0.08);
 }
 
 .hairline-border-hover:hover {
-  border-color: rgba(255, 255, 255, 0.16);
+  border-color: rgba(254, 243, 199, 0.16);
 }
 
 /* Glassmorphism panel */
 .glass-panel {
-  background: rgba(15, 15, 20, 0.7);
+  background: rgba(39, 37, 37, 0.7);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(254, 243, 199, 0.08);
 }
 
 /* Custom sleek Range Slider */
@@ -56,10 +56,10 @@ input[type="range"]::-webkit-slider-thumb {
   width: 14px;
   height: 14px;
   border-radius: 50%;
-  background: var(--accent-orange);
+  background: var(--accent-amber);
   cursor: pointer;
-  border: 2px solid #070709;
-  box-shadow: 0 0 10px rgba(249, 115, 22, 0.5);
+  border: 2px solid #1C1A1A;
+  box-shadow: 0 0 10px var(--accent-glow);
   transition: transform 0.15s ease;
 }
 
@@ -78,10 +78,15 @@ input[type="range"]::-webkit-slider-thumb:hover {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(254, 243, 199, 0.15);
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.25);
+  background: rgba(254, 243, 199, 0.25);
+}
+
+@keyframes sweep {
+  0% { width: 0%; opacity: 0.8; }
+  100% { width: 100%; opacity: 0; }
 }

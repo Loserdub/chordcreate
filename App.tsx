@@ -1,7 +1,11 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { ChordSlot } from './components/ChordSlot';
+import { SortableChordSlot } from './components/SortableChordSlot';
 import { PianoKeyboard } from './components/PianoKeyboard';
 import { audioService, SYNTH_TONE_OPTIONS } from './services/audioService';
+import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
+import { SortableContext, sortableKeyboardCoordinates, rectSortingStrategy, arrayMove } from '@dnd-kit/sortable';
+
+const generateId = () => `slot-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
 import { DEFAULT_PROGRESSION, VIBE_GROUPS, AVAILABLE_CHORDS } from './constants';
 import { SynthToneId } from './types';
 import { Play, Square, Download, Music2, Shuffle, SlidersHorizontal, ChevronRight } from 'lucide-react';
@@ -12,12 +16,29 @@ type PlaybackMode = 'ALL' | 'ROW1' | 'ROW2' | null;
 
 const App: React.FC = () => {
   // Ensure we have 8 chords
-  const [progression, setProgression] = useState<string[]>(() => {
-    if (DEFAULT_PROGRESSION.length < 8) {
-      return [...DEFAULT_PROGRESSION, ...DEFAULT_PROGRESSION].slice(0, 8);
+  const [progression, setProgression] = useState<{id: string, chord: string}[]>(() => {
+    let chords = DEFAULT_PROGRESSION;
+    if (chords.length < 8) {
+      chords = [...DEFAULT_PROGRESSION, ...DEFAULT_PROGRESSION].slice(0, 8);
     }
-    return DEFAULT_PROGRESSION;
+    return chords.map(chord => ({ id: generateId(), chord }));
   });
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (over && active.id !== over.id) {
+      setProgression((items) => {
+        const oldIndex = items.findIndex((item) => item.id === active.id);
+        const newIndex = items.findIndex((item) => item.id === over.id);
+        return arrayMove(items, oldIndex, newIndex);
+      });
+    }
+  };
   
   const [playingIndex, setPlayingIndex] = useState<number | null>(null);
   const [playbackMode, setPlaybackMode] = useState<PlaybackMode>(null);
@@ -38,7 +59,7 @@ const App: React.FC = () => {
     audioService.stop();
 
     const newProgression = [...progression];
-    newProgression[index] = newChord;
+    newProgression[index] = { ...newProgression[index], chord: newChord };
     setProgression(newProgression);
     
     // Play preview on change (short)
@@ -57,7 +78,7 @@ const App: React.FC = () => {
         const currentIndex = vibeIndices[vibeId] ?? 0;
         const prog = vibeGroup.progressions[currentIndex];
         setSelectedProgressionId(prog.id);
-        setProgression([...prog.chords]);
+        setProgression(prog.chords.map(chord => ({ id: generateId(), chord })));
         audioService.playChord(prog.chords[0], "4n");
       }
     } else if (val.startsWith('preset:')) {
@@ -69,7 +90,7 @@ const App: React.FC = () => {
           setSelectedVibeId(vibe.id);
           setSelectedProgressionId(prog.id);
           setVibeIndices(prev => ({ ...prev, [vibe.id]: idx }));
-          setProgression([...prog.chords]);
+          setProgression(prog.chords.map(chord => ({ id: generateId(), chord })));
           audioService.playChord(prog.chords[0], "4n");
           break;
         }
@@ -81,7 +102,7 @@ const App: React.FC = () => {
     setSelectedToneId(toneId);
     audioService.setSynthTone(toneId);
     // Play quick preview note/chord with new synth tone
-    audioService.playChord(progression[0], "8n");
+    audioService.playChord(progression[0].chord, "8n");
   };
 
   const randomizeVibeProgression = () => {
@@ -101,7 +122,7 @@ const App: React.FC = () => {
     
     const nextProg = vibeGroup.progressions[nextIndex];
     setSelectedProgressionId(nextProg.id);
-    setProgression([...nextProg.chords]);
+    setProgression(nextProg.chords.map(chord => ({ id: generateId(), chord })));
     audioService.playChord(nextProg.chords[0], "4n");
   };
 
@@ -128,7 +149,7 @@ const App: React.FC = () => {
     setPlayingIndex(index);
     
     // Play chord for quarter note
-    await audioService.playChord(progression[index], "4n");
+    await audioService.playChord(progression[index].chord, "4n");
     
     // Visual highlight off after 500ms
     playbackTimeoutRef.current = setTimeout(() => {
@@ -195,7 +216,7 @@ const App: React.FC = () => {
         setPlayingIndex(actualIndex);
       }, time);
 
-      const chord = progression[actualIndex];
+      const chord = progression[actualIndex].chord;
       // Play for a full beat (quarter note)
       audioService.playChord(chord, "4n");
 
@@ -213,8 +234,8 @@ const App: React.FC = () => {
 
     const slice = progression.slice(startIndex, startIndex + count);
 
-    slice.forEach((chordName, i) => {
-      const notes = audioService.getNotesForChord(chordName);
+    slice.forEach((slot, i) => {
+      const notes = audioService.getNotesForChord(slot.chord);
       // 1 chord = 1 beat
       const beatDuration = 60 / bpm;
       const startTime = i * beatDuration;
@@ -252,27 +273,29 @@ const App: React.FC = () => {
   }, [bpm]);
 
   const renderRow = (rowId: number, startIndex: number) => (
-    <div className="flex flex-col md:flex-row gap-4 items-stretch bg-neutral-900/40 p-4 rounded-2xl border border-white/[0.08] backdrop-blur-sm shadow-xl">
+    <div className="flex flex-col md:flex-row gap-4 items-stretch bg-stone-900/40 p-4 rounded-2xl border border-amber-100/[0.08] backdrop-blur-sm shadow-xl">
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 flex-grow">
-            {progression.slice(startIndex, startIndex + 4).map((chord, i) => {
+            {progression.slice(startIndex, startIndex + 4).map((slot, i) => {
                 const globalIndex = startIndex + i;
                 return (
-                    <ChordSlot
-                        key={globalIndex}
-                        id={globalIndex}
-                        selectedChord={chord}
+                    <SortableChordSlot
+                        key={slot.id}
+                        slotId={slot.id}
+                        globalIndex={globalIndex}
+                        selectedChord={slot.chord}
                         isActive={playingIndex === globalIndex}
                         onSelect={(c) => handleChordChange(globalIndex, c)}
                         onPlay={() => playSingleChord(globalIndex)}
                         isPlaying={playingIndex === globalIndex}
+                        bpm={bpm}
                     />
                 );
             })}
         </div>
         
         {/* Row Controls Sidebar */}
-        <div className="flex flex-row md:flex-col justify-center gap-2 min-w-[120px] bg-neutral-950/80 p-3 rounded-xl border border-white/[0.08]">
-             <div className="font-mono text-[9px] font-bold text-neutral-600 uppercase tracking-[0.2em] text-center mb-0.5">
+        <div className="flex flex-row md:flex-col justify-center gap-2 min-w-[120px] bg-stone-950/80 p-3 rounded-xl border border-amber-100/[0.08]">
+             <div className="font-mono text-[9px] font-bold text-stone-600 uppercase tracking-[0.2em] text-center mb-0.5">
                  SECTION {rowId === 1 ? 'A' : 'B'}
              </div>
              
@@ -282,7 +305,7 @@ const App: React.FC = () => {
                     flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg font-mono text-xs font-bold transition-all border
                     ${(rowId === 1 && playbackMode === 'ROW1') || (rowId === 2 && playbackMode === 'ROW2')
                         ? 'bg-red-500/20 text-red-400 border-red-500/40 hover:bg-red-500/30' 
-                        : 'bg-neutral-900 text-neutral-300 border-white/[0.08] hover:border-orange-500/40 hover:text-orange-400 hover:bg-neutral-850'
+                        : 'bg-stone-900 text-stone-300 border-amber-100/[0.08] hover:border-amber-500/40 hover:text-amber-400 hover:bg-stone-850'
                     }
                 `}
              >
@@ -295,7 +318,7 @@ const App: React.FC = () => {
 
              <button
                 onClick={() => exportMidi(startIndex, 4, `row-${rowId}.mid`)}
-                className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-neutral-900 hover:bg-neutral-800 text-neutral-400 hover:text-orange-400 rounded-lg border border-white/[0.08] transition-all font-mono text-[11px] font-semibold"
+                className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-stone-900 hover:bg-stone-800 text-stone-400 hover:text-amber-400 rounded-lg border border-amber-100/[0.08] transition-all font-mono text-[11px] font-semibold"
              >
                 <Download size={12} />
                 MIDI
@@ -305,51 +328,51 @@ const App: React.FC = () => {
   );
 
   return (
-    <div className="min-h-screen bg-[#070709] text-neutral-100 flex flex-col items-center py-8 px-4 font-sans selection:bg-orange-500 selection:text-black">
+    <div className="min-h-screen bg-[#070709] text-stone-100 flex flex-col items-center py-8 px-4 font-sans selection:bg-amber-500 selection:text-black">
       
       {/* Header */}
-      <header className="w-full max-w-6xl mb-8 flex flex-col md:flex-row justify-between items-center gap-6 pb-6 border-b border-white/[0.08]">
+      <header className="w-full max-w-6xl mb-8 flex flex-col md:flex-row justify-between items-center gap-6 pb-6 border-b border-amber-100/[0.08]">
         <div className="flex-1 text-center md:text-left">
           <div className="inline-flex items-center gap-1.5 mb-3">
-            <span className="font-mono text-[9px] font-bold text-neutral-500 uppercase tracking-[0.2em]">trustnodelogic.com</span>
-            <ChevronRight size={9} className="text-neutral-600" />
-            <span className="font-mono text-[9px] font-bold text-orange-500/80 uppercase tracking-[0.2em]">chordcreate</span>
+            <span className="font-mono text-[9px] font-bold text-stone-500 uppercase tracking-[0.2em]">trustnodelogic.com</span>
+            <ChevronRight size={9} className="text-stone-600" />
+            <span className="font-mono text-[9px] font-bold text-amber-500/80 uppercase tracking-[0.2em]">chordcreate</span>
           </div>
-          <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-orange-400 via-amber-300 to-neutral-300">
+          <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-amber-400 via-amber-300 to-stone-300">
             ChordFlow
           </h1>
-          <p className="text-neutral-500 text-[11px] font-mono mt-1.5 tracking-wider">
+          <p className="text-stone-500 text-[11px] font-mono mt-1.5 tracking-wider">
             8-step chord sequencer &nbsp;·&nbsp; voice leading &nbsp;·&nbsp; MIDI export
           </p>
         </div>
 
         {/* Global Controls */}
-        <div className="flex flex-wrap items-center justify-center gap-3 bg-neutral-900/80 p-3 rounded-2xl border border-white/[0.08] shadow-2xl backdrop-blur-md">
+        <div className="flex flex-wrap items-center justify-center gap-3 bg-stone-900/80 p-3 rounded-2xl border border-amber-100/[0.08] shadow-2xl backdrop-blur-md">
              {/* Vibe & Progression Selector */}
              <div className="flex items-center gap-2">
                <div className="relative">
                  <select
                    value={selectedProgressionId ? `preset:${selectedProgressionId}` : (selectedVibeId ? `vibe:${selectedVibeId}` : '')}
                    onChange={(e) => handleVibeSelect(e.target.value)}
-                   className="appearance-none bg-neutral-950 text-neutral-200 border border-white/[0.08] hover:border-orange-500/40 rounded-lg py-2 pl-8 pr-7 text-xs font-mono font-semibold focus:outline-none focus:ring-1 focus:ring-orange-500 cursor-pointer transition-colors max-w-[220px] sm:max-w-none truncate"
+                   className="appearance-none bg-stone-950 text-stone-200 border border-amber-100/[0.08] hover:border-amber-500/40 rounded-lg py-2 pl-8 pr-7 text-xs font-mono font-semibold focus:outline-none focus:ring-1 focus:ring-amber-500 cursor-pointer transition-colors max-w-[220px] sm:max-w-none truncate"
                    title="Select a harmonic vibe or progression"
                  >
                    <option value="" disabled>GENRE / MOOD</option>
                    {VIBE_GROUPS.map(vibe => (
-                     <optgroup key={vibe.id} label={`${vibe.icon} ${vibe.name}`} className="bg-neutral-900 text-orange-400 font-bold">
-                       <option value={`vibe:${vibe.id}`} className="bg-neutral-900 text-neutral-100 font-semibold">
+                     <optgroup key={vibe.id} label={`${vibe.icon} ${vibe.name}`} className="bg-stone-900 text-amber-400 font-bold">
+                       <option value={`vibe:${vibe.id}`} className="bg-stone-900 text-stone-100 font-semibold">
                          {vibe.icon} All {vibe.name} (Cycle 1-{vibe.progressions.length})
                        </option>
                        {vibe.progressions.map((p, idx) => (
-                         <option key={p.id} value={`preset:${p.id}`} className="bg-neutral-950 text-neutral-300 font-normal">
+                         <option key={p.id} value={`preset:${p.id}`} className="bg-stone-950 text-stone-300 font-normal">
                            &nbsp;&nbsp;{idx + 1}. {p.name}
                          </option>
                        ))}
                      </optgroup>
                    ))}
                  </select>
-                 <Music2 size={13} className="absolute left-2.5 top-2.5 text-orange-500 pointer-events-none" />
-                 <div className="absolute right-2.5 top-3 pointer-events-none text-neutral-500">
+                 <Music2 size={13} className="absolute left-2.5 top-2.5 text-amber-500 pointer-events-none" />
+                 <div className="absolute right-2.5 top-3 pointer-events-none text-stone-500">
                    <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
                    </svg>
@@ -357,7 +380,7 @@ const App: React.FC = () => {
                </div>
                <button
                  onClick={randomizeVibeProgression}
-                 className="p-2 rounded-lg bg-neutral-950 hover:bg-neutral-850 text-neutral-400 hover:text-orange-400 border border-white/[0.08] hover:border-orange-500/40 transition-all flex items-center justify-center"
+                 className="p-2 rounded-lg bg-stone-950 hover:bg-stone-850 text-stone-400 hover:text-amber-400 border border-amber-100/[0.08] hover:border-amber-500/40 transition-all flex items-center justify-center"
                  title={activeVibeGroup ? `Cycle next chord progression in "${activeVibeGroup.name}" (${activeProgressionIndex + 1}/${activeVibeGroup.progressions.length})` : "Cycle vibe chord progression"}
                >
                  <Shuffle size={14} />
@@ -365,56 +388,56 @@ const App: React.FC = () => {
              </div>
 
 
-             <div className="w-[1px] h-6 bg-white/[0.08] hidden md:block"></div>
+             <div className="w-[1px] h-6 bg-amber-100/[0.08] hidden md:block"></div>
 
              {/* Synth Tone Preset Selector */}
              <div className="relative">
                <select
                  value={selectedToneId}
                  onChange={(e) => handleToneChange(e.target.value as SynthToneId)}
-                 className="appearance-none bg-neutral-950 text-neutral-200 border border-white/[0.08] hover:border-orange-500/40 rounded-lg py-2 pl-8 pr-7 text-xs font-mono font-semibold focus:outline-none focus:ring-1 focus:ring-orange-500 cursor-pointer transition-colors"
+                 className="appearance-none bg-stone-950 text-stone-200 border border-amber-100/[0.08] hover:border-amber-500/40 rounded-lg py-2 pl-8 pr-7 text-xs font-mono font-semibold focus:outline-none focus:ring-1 focus:ring-amber-500 cursor-pointer transition-colors"
                  title="Select synth sound model"
                >
                  {SYNTH_TONE_OPTIONS.map(t => (
-                   <option key={t.id} value={t.id} className="bg-neutral-900 text-neutral-200">
+                   <option key={t.id} value={t.id} className="bg-stone-900 text-stone-200">
                      🎹 {t.name}
                    </option>
                  ))}
                </select>
-               <SlidersHorizontal size={13} className="absolute left-2.5 top-2.5 text-orange-500 pointer-events-none" />
-               <div className="absolute right-2.5 top-3 pointer-events-none text-neutral-500">
+               <SlidersHorizontal size={13} className="absolute left-2.5 top-2.5 text-amber-500 pointer-events-none" />
+               <div className="absolute right-2.5 top-3 pointer-events-none text-stone-500">
                  <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
                  </svg>
                </div>
              </div>
 
-             <div className="w-[1px] h-6 bg-white/[0.08] hidden md:block"></div>
+             <div className="w-[1px] h-6 bg-amber-100/[0.08] hidden md:block"></div>
 
              <button
                 onClick={() => exportMidi(0, 8, 'full-progression.mid')}
-                className="flex items-center gap-2 px-4 py-2 bg-neutral-950 hover:bg-neutral-850 text-neutral-200 rounded-lg border border-white/[0.08] hover:border-orange-500/40 transition-all font-mono text-xs font-semibold shadow-sm"
+                className="flex items-center gap-2 px-4 py-2 bg-stone-950 hover:bg-stone-850 text-stone-200 rounded-lg border border-amber-100/[0.08] hover:border-amber-500/40 transition-all font-mono text-xs font-semibold shadow-sm"
              >
-                <Download size={14} className="text-orange-500" />
+                <Download size={14} className="text-amber-500" />
                 EXPORT MIDI
              </button>
 
-            <div className="w-[1px] h-6 bg-white/[0.08] hidden md:block"></div>
+            <div className="w-[1px] h-6 bg-amber-100/[0.08] hidden md:block"></div>
 
             <div className="flex items-center gap-3 px-1">
-                <span className="text-[10px] font-mono font-bold text-neutral-400 uppercase tracking-widest">BPM</span>
+                <span className="text-[10px] font-mono font-bold text-stone-400 uppercase tracking-widest">BPM</span>
                 <input 
                     type="range" 
                     min="60" 
                     max="160" 
                     value={bpm} 
                     onChange={(e) => setBpm(Number(e.target.value))}
-                    className="w-24 accent-orange-500 h-1 bg-neutral-800 rounded-lg appearance-none cursor-pointer"
+                    className="w-24 accent-amber-500 h-1 bg-stone-800 rounded-lg appearance-none cursor-pointer"
                 />
-                <span className="text-xs font-mono font-bold text-orange-400 w-8">{bpm}</span>
+                <span className="text-xs font-mono font-bold text-amber-400 w-8">{bpm}</span>
             </div>
 
-            <div className="w-[1px] h-6 bg-white/[0.08] hidden md:block"></div>
+            <div className="w-[1px] h-6 bg-amber-100/[0.08] hidden md:block"></div>
 
             <button
                 onClick={() => togglePlayback('ALL')}
@@ -422,7 +445,7 @@ const App: React.FC = () => {
                     flex items-center gap-2 px-5 py-2 rounded-lg font-mono text-xs font-bold transition-all shadow-lg min-w-[110px] justify-center border
                     ${playbackMode === 'ALL'
                         ? 'bg-red-500/20 text-red-400 border-red-500/40 shadow-red-500/10' 
-                        : 'bg-orange-500 text-neutral-950 border-orange-400 shadow-orange-500/20 hover:bg-orange-400'
+                        : 'bg-amber-500 text-stone-950 border-amber-400 shadow-amber-500/20 hover:bg-amber-400'
                     }
                 `}
             >
@@ -436,20 +459,24 @@ const App: React.FC = () => {
       </header>
 
       {/* Main Content Area */}
-      <main className="w-full max-w-6xl flex flex-col gap-6 mb-8">
-        {renderRow(1, 0)}
-        {renderRow(2, 4)}
-      </main>
+      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+        <SortableContext items={progression.map(p => p.id)} strategy={rectSortingStrategy}>
+          <main className="w-full max-w-6xl flex flex-col gap-6 mb-8">
+            {renderRow(1, 0)}
+            {renderRow(2, 4)}
+          </main>
+        </SortableContext>
+      </DndContext>
 
       {/* Master Keyboard Visualizer */}
       <div className="w-full max-w-6xl mb-8">
-        <div className="bg-neutral-900/40 border border-white/[0.08] rounded-2xl p-5 shadow-2xl backdrop-blur-sm">
+        <div className="bg-stone-900/40 border border-amber-100/[0.08] rounded-2xl p-5 shadow-2xl backdrop-blur-sm">
             <div className="flex justify-between items-center mb-4">
                 <div className="flex items-center gap-2">
-                    <Music2 size={15} className="text-orange-500" />
-                    <h3 className="text-xs font-mono font-bold text-neutral-300 uppercase tracking-wider">Piano</h3>
+                    <Music2 size={15} className="text-amber-500" />
+                    <h3 className="text-xs font-mono font-bold text-stone-300 uppercase tracking-wider">Piano</h3>
                 </div>
-                <div className="font-mono text-[10px] text-neutral-500">
+                <div className="font-mono text-[10px] text-stone-500">
                     {playingIndex !== null 
                         ? `${progression[playingIndex]}  ·  slot ${playingIndex + 1}` 
                         : 'click a slot or key to preview'}
@@ -457,7 +484,7 @@ const App: React.FC = () => {
             </div>
             
             <PianoKeyboard 
-                activeNotes={playingIndex !== null ? audioService.getNotesForChord(progression[playingIndex]) : []} 
+                activeNotes={playingIndex !== null ? audioService.getNotesForChord(progression[playingIndex].chord) : []} 
                 height={170} 
                 interactive={true}
             />
@@ -465,14 +492,14 @@ const App: React.FC = () => {
       </div>
 
       {/* Footer */}
-      <footer className="mt-auto py-6 text-neutral-400 text-xs font-mono border-t border-white/[0.08] w-full max-w-6xl text-center flex flex-col sm:flex-row justify-between items-center gap-4">
+      <footer className="mt-auto py-6 text-stone-400 text-xs font-mono border-t border-amber-100/[0.08] w-full max-w-6xl text-center flex flex-col sm:flex-row justify-between items-center gap-4">
         <div>
-          © 2026 <a href="https://trustnodelogic.com" target="_blank" rel="noopener noreferrer" className="text-neutral-300 hover:text-orange-400 transition-colors">Trust Node Logic</a> · Justin Ray (JRAY / loserdub)
+          © 2026 <a href="https://trustnodelogic.com" target="_blank" rel="noopener noreferrer" className="text-stone-300 hover:text-amber-400 transition-colors">Trust Node Logic</a> · Justin Ray (JRAY / loserdub)
         </div>
         <div className="flex items-center gap-4">
-          <a href="https://trustnodelogic.com" target="_blank" rel="noopener noreferrer" className="text-neutral-400 hover:text-orange-400 transition-colors">trustnodelogic.com</a>
+          <a href="https://trustnodelogic.com" target="_blank" rel="noopener noreferrer" className="text-stone-400 hover:text-amber-400 transition-colors">trustnodelogic.com</a>
           <span>·</span>
-          <a href="https://www.reddit.com/r/hybridproduction/" target="_blank" rel="noopener noreferrer" className="text-neutral-400 hover:text-orange-400 transition-colors">r/hybridproduction</a>
+          <a href="https://www.reddit.com/r/hybridproduction/" target="_blank" rel="noopener noreferrer" className="text-stone-400 hover:text-amber-400 transition-colors">r/hybridproduction</a>
         </div>
       </footer>
 

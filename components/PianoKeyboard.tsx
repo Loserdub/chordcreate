@@ -36,18 +36,18 @@ export const PianoKeyboard: React.FC<PianoKeyboardProps> = ({
             key={fullNote}
             onMouseDown={() => interactive && audioService.playNote(fullNote)}
             className={`
-              relative flex-1 border-b-[3px] border-l border-r border-neutral-300 rounded-[3px] cursor-pointer select-none 
+              relative flex-1 border-b-[3px] border-l border-r border-stone-300 rounded-[3px] cursor-pointer select-none 
               transition-all duration-75 ease-out origin-top
               ${isActive 
-                ? 'bg-gradient-to-b from-orange-400 to-orange-600 border-orange-700 shadow-[inset_0_3px_5px_rgba(0,0,0,0.3)] z-0 translate-y-[2px] scale-y-[0.98]' 
-                : 'bg-neutral-200 hover:bg-neutral-100 shadow-sm'
+                ? 'bg-gradient-to-b from-amber-400 to-amber-600 border-amber-700 shadow-[inset_0_3px_5px_rgba(0,0,0,0.3)] z-0 translate-y-[2px] scale-y-[0.98]' 
+                : 'bg-stone-200 hover:bg-stone-100 shadow-sm'
               }
             `}
             style={{ height: height }}
           >
              {/* Key Label */}
              {isActive && (
-               <div className="absolute bottom-2 inset-x-0 text-center font-mono text-[10px] font-bold text-white pointer-events-none drop-shadow-md">
+               <div className="absolute bottom-2 inset-x-0 text-center font-mono text-[10px] font-bold text-amber-50 pointer-events-none drop-shadow-md">
                  {note}
                </div>
              )}
@@ -72,10 +72,10 @@ export const PianoKeyboard: React.FC<PianoKeyboardProps> = ({
                     className={`
                         absolute z-10 w-[7.8%] h-[60%] rounded-b-[4px] rounded-t-[2px] cursor-pointer select-none 
                         transition-all duration-75 ease-out origin-top
-                        border-x border-b border-black ring-1 ring-white/10
+                        border-x border-b border-black ring-1 ring-amber-100/10
                         ${isBlackActive 
-                            ? 'bg-gradient-to-b from-orange-500 to-orange-700 shadow-[inset_0_2px_4px_rgba(0,0,0,0.5)] translate-y-[1px] scale-[0.96]' 
-                            : 'bg-gradient-to-b from-neutral-800 to-neutral-950 shadow-md'
+                            ? 'bg-gradient-to-b from-amber-500 to-amber-700 shadow-[inset_0_2px_4px_rgba(0,0,0,0.5)] translate-y-[1px] scale-[0.96]' 
+                            : 'bg-gradient-to-b from-stone-800 to-stone-950 shadow-md'
                         }
                     `}
                     style={{
@@ -91,7 +91,7 @@ export const PianoKeyboard: React.FC<PianoKeyboardProps> = ({
     }
 
     return (
-        <div className="relative flex gap-[2px] w-full h-full bg-neutral-950 p-1.5 rounded-xl shadow-inner overflow-hidden border border-white/[0.08]">
+        <div className="relative flex gap-[2px] w-full h-full bg-stone-950 p-1.5 rounded-xl shadow-inner overflow-hidden border border-amber-100/[0.08]">
             {keys}
         </div>
     );
