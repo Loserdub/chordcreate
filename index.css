@@ -1,52 +1,96 @@
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  --bg-dark: #1C1A1A;
-  --surface-dark: #272525;
-  --surface-border: rgba(254, 243, 199, 0.08);
-  --surface-hover: rgba(254, 243, 199, 0.14);
-  --accent-amber: #F59E0B;
-  --accent-glow: rgba(245, 158, 11, 0.25);
-  --font-mono: 'IBM Plex Mono', monospace;
-  --font-sans: 'Space Grotesk', system-ui, -apple-system, sans-serif;
+  --daw-bg: #0A0C10;
+  --daw-chassis: #12151B;
+  --daw-panel: #161A22;
+  --daw-surface: #1C212B;
+  --daw-surface-hover: #252C3A;
+  --daw-inset: #0D1015;
+  --daw-border: rgba(255, 255, 255, 0.08);
+  --daw-border-subtle: rgba(255, 255, 255, 0.04);
+  --daw-border-hover: rgba(255, 255, 255, 0.18);
+  --daw-cyan: #00E5FF;
+  --daw-cyan-dim: #0284C7;
+  --daw-cyan-glow: rgba(0, 229, 255, 0.25);
+  --daw-amber: #F59E0B;
+  --daw-amber-glow: rgba(245, 158, 11, 0.25);
+  --daw-green: #10B981;
+  --daw-green-glow: rgba(16, 185, 129, 0.4);
+  --daw-red: #F43F5E;
+  --font-mono: 'JetBrains Mono', monospace;
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
 }
 
 body {
   font-family: var(--font-sans);
-  background-color: var(--bg-dark);
-  color: #FEF3C7; /* Cream / Parchment */
+  background-color: var(--daw-bg);
+  color: #F1F5F9; /* Clean studio slate text */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Custom hairline borders */
-.hairline-border {
-  border: 1px solid rgba(254, 243, 199, 0.08);
+/* ── Pro Tools Console Hardware Panels ── */
+.daw-chassis {
+  background: linear-gradient(180deg, #151922 0%, #10131A 100%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 16px 36px -12px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.07);
 }
 
-.hairline-border-hover:hover {
-  border-color: rgba(254, 243, 199, 0.16);
+.daw-panel {
+  background: linear-gradient(180deg, #1C212B 0%, #151921 100%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
-/* Glassmorphism panel */
-.glass-panel {
-  background: rgba(39, 37, 37, 0.7);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(254, 243, 199, 0.08);
+.daw-panel-hover:hover {
+  border-color: rgba(0, 229, 255, 0.35);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 0 14px rgba(0, 229, 255, 0.12);
 }
 
-/* Custom sleek Range Slider */
+.daw-inset {
+  background: #0D1015;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.7);
+}
+
+.daw-glow-cyan {
+  box-shadow: 0 0 20px rgba(0, 229, 255, 0.22);
+}
+
+/* Micro LED Tally Lights */
+.daw-led {
+  width: 6px;
+  height: 6px;
+  border-radius: 9999px;
+  transition: all 0.15s ease-out;
+}
+
+.daw-led-active {
+  background-color: var(--daw-cyan);
+  box-shadow: 0 0 8px #00E5FF, 0 0 14px rgba(0, 229, 255, 0.6);
+}
+
+.daw-led-green {
+  background-color: var(--daw-green);
+  box-shadow: 0 0 8px #10B981, 0 0 14px rgba(16, 185, 129, 0.6);
+}
+
+.daw-led-off {
+  background-color: #242B38;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Custom Sleek DAW Range Slider */
 input[type="range"] {
   -webkit-appearance: none;
   appearance: none;
-  background: rgba(255, 255, 255, 0.1);
-  height: 4px;
-  border-radius: 2px;
+  background: #0D1015;
+  height: 5px;
+  border-radius: 3px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
   outline: none;
 }
 
@@ -55,38 +99,50 @@ input[type="range"]::-webkit-slider-thumb {
   appearance: none;
   width: 14px;
   height: 14px;
-  border-radius: 50%;
-  background: var(--accent-amber);
+  border-radius: 3px;
+  background: linear-gradient(180deg, #38BDF8 0%, #0284C7 100%);
   cursor: pointer;
-  border: 2px solid #1C1A1A;
-  box-shadow: 0 0 10px var(--accent-glow);
-  transition: transform 0.15s ease;
+  border: 1px solid #7DD3FC;
+  box-shadow: 0 0 8px rgba(0, 229, 255, 0.45);
+  transition: transform 0.12s ease;
 }
 
 input[type="range"]::-webkit-slider-thumb:hover {
-  transform: scale(1.2);
+  transform: scale(1.15);
+  box-shadow: 0 0 12px rgba(0, 229, 255, 0.75);
 }
 
-/* Custom Scrollbar */
+/* Custom Studio Scrollbar */
 ::-webkit-scrollbar {
-  width: 5px;
-  height: 5px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: transparent;
+  background: #0D1015;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(254, 243, 199, 0.15);
+  background: #252D3D;
   border-radius: 3px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(254, 243, 199, 0.25);
+  background: #333F54;
 }
 
+/* Laser Phosphor Playhead Sweep */
 @keyframes sweep {
-  0% { width: 0%; opacity: 0.8; }
-  100% { width: 100%; opacity: 0; }
+  0% {
+    width: 0%;
+    opacity: 0.9;
+  }
+  90% {
+    opacity: 0.8;
+  }
+  100% {
+    width: 100%;
+    opacity: 0;
+  }
 }

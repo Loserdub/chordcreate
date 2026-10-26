@@ -36,32 +36,33 @@ export const ChordPicker: React.FC<ChordPickerProps> = ({ selectedChord, onSelec
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md" onClick={onClose}>
       <div 
-        className="bg-stone-900 border border-amber-500/30 rounded-2xl shadow-2xl w-full max-w-3xl overflow-hidden flex flex-col max-h-[85vh] animate-in fade-in zoom-in-95 duration-200"
+        className="bg-[#12151B] border border-cyan-500/30 rounded-xl shadow-[0_25px_60px_-15px_rgba(0,0,0,0.9),0_0_30px_rgba(0,229,255,0.15)] w-full max-w-3xl overflow-hidden flex flex-col max-h-[85vh] animate-in fade-in zoom-in-95 duration-200"
         onClick={e => e.stopPropagation()}
       >
-        <div className="p-4 border-b border-amber-100/[0.08] flex justify-between items-center bg-stone-950">
-          <div className="flex items-center gap-2 text-amber-400">
-            <Music size={18} />
-            <h3 className="font-mono font-bold tracking-wider">CHORD LIBRARY</h3>
+        <div className="p-3.5 border-b border-white/[0.08] flex justify-between items-center bg-gradient-to-r from-[#181C24] to-[#12151B]">
+          <div className="flex items-center gap-2.5 text-cyan-400">
+            <span className="daw-led daw-led-active" />
+            <Music size={16} />
+            <h3 className="font-mono font-bold text-xs tracking-[0.2em] uppercase text-slate-200">AUDIOSUITE // CHORD BROWSER</h3>
           </div>
-          <button onClick={onClose} className="text-stone-400 hover:text-amber-50 transition-colors bg-stone-800 p-1 rounded-md">
-            <X size={18} />
+          <button onClick={onClose} className="text-slate-400 hover:text-slate-100 hover:bg-[#252C3A] transition-colors p-1.5 rounded border border-white/[0.06]">
+            <X size={15} />
           </button>
         </div>
         
         <div className="flex flex-1 overflow-hidden min-h-[400px]">
           {/* Sidebar - Roots */}
-          <div className="w-20 sm:w-24 border-r border-amber-100/[0.08] bg-stone-950/80 overflow-y-auto">
+          <div className="w-20 sm:w-24 border-r border-white/[0.08] bg-[#0A0C10] overflow-y-auto">
             {ROOT_NOTES.map(root => (
               <button
                 key={root}
                 onClick={() => setSelectedRoot(root)}
-                className={`w-full py-3.5 px-2 font-mono font-bold text-sm text-center transition-all ${
+                className={`w-full py-3 px-2 font-mono text-xs text-center transition-all ${
                   selectedRoot === root 
-                    ? 'bg-amber-500/20 text-amber-400 border-l-2 border-amber-500 shadow-[inset_0_0_10px_rgba(249,115,22,0.1)]' 
-                    : 'text-stone-500 hover:bg-stone-800 hover:text-stone-300 border-l-2 border-transparent'
+                    ? 'bg-cyan-500/15 text-cyan-300 border-l-2 border-cyan-400 font-bold shadow-[inset_0_0_12px_rgba(0,229,255,0.1)]' 
+                    : 'text-slate-500 hover:bg-[#161A22] hover:text-slate-200 border-l-2 border-transparent font-medium'
                 }`}
               >
                 {root}
@@ -70,7 +71,7 @@ export const ChordPicker: React.FC<ChordPickerProps> = ({ selectedChord, onSelec
           </div>
           
           {/* Content - Chords */}
-          <div className="flex-1 p-4 overflow-y-auto bg-stone-900/50">
+          <div className="flex-1 p-4 overflow-y-auto bg-[#0E1117]">
              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
                {rootChords.length > 0 ? rootChords.map(chord => (
                  <button
@@ -82,21 +83,21 @@ export const ChordPicker: React.FC<ChordPickerProps> = ({ selectedChord, onSelec
                        onClose();
                    }}
                    className={`
-                     p-3.5 rounded-xl border text-left flex flex-col gap-1.5 transition-all
+                     p-3.5 rounded-lg border text-left flex flex-col gap-1.5 transition-all
                      ${selectedChord === chord 
-                        ? 'border-amber-500 bg-amber-500/10 shadow-[0_0_15px_rgba(249,115,22,0.15)] scale-[1.02]' 
-                        : 'border-amber-100/[0.06] bg-stone-950/80 hover:border-amber-500/40 hover:bg-stone-800 hover:-translate-y-0.5'}
+                        ? 'border-cyan-400 bg-gradient-to-b from-cyan-950/40 to-slate-900/90 shadow-[0_0_18px_rgba(0,229,255,0.2),inset_0_1px_0_rgba(255,255,255,0.15)] scale-[1.02]' 
+                        : 'border-white/[0.07] bg-gradient-to-b from-[#181C24] to-[#13161D] hover:border-cyan-500/40 hover:bg-[#1E232E] hover:-translate-y-0.5 shadow-sm'}
                    `}
                  >
-                   <span className={`font-bold font-mono text-base ${selectedChord === chord ? 'text-amber-400' : 'text-stone-200'}`}>
+                   <span className={`font-bold font-mono text-base ${selectedChord === chord ? 'text-cyan-300' : 'text-slate-100'}`}>
                      {chord}
                    </span>
-                   <span className="text-[11px] text-stone-500 italic leading-snug line-clamp-2">
+                   <span className="text-[11px] text-slate-400 leading-snug line-clamp-2">
                      {getChordDescription(chord)}
                    </span>
                  </button>
                )) : (
-                 <div className="col-span-full flex items-center justify-center h-full text-stone-500 font-mono text-sm">
+                 <div className="col-span-full flex items-center justify-center h-full text-slate-500 font-mono text-sm">
                    No chords found for root {selectedRoot}
                  </div>
                )}
@@ -105,9 +106,9 @@ export const ChordPicker: React.FC<ChordPickerProps> = ({ selectedChord, onSelec
         </div>
         
         {/* Footer info */}
-        <div className="p-3 bg-stone-950 border-t border-amber-100/[0.08] flex justify-between items-center font-mono text-[10px] text-stone-500">
-          <div>{hoveredChord ? `Previewing: ${hoveredChord}` : 'Hover to preview • Click to select'}</div>
-          <div>ROOT: <span className="text-amber-400 font-bold">{selectedRoot}</span></div>
+        <div className="p-3 bg-[#0A0C10] border-t border-white/[0.08] flex justify-between items-center font-mono text-[10px] text-slate-400">
+          <div>{hoveredChord ? <span className="text-cyan-400 font-semibold">PREVIEW: {hoveredChord}</span> : 'HOVER TO AUDITION • CLICK TO ASSIGN'}</div>
+          <div>ROOT: <span className="text-cyan-400 font-bold">{selectedRoot}</span></div>
         </div>
       </div>
     </div>

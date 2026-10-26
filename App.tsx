@@ -273,7 +273,7 @@ const App: React.FC = () => {
   }, [bpm]);
 
   const renderRow = (rowId: number, startIndex: number) => (
-    <div className="flex flex-col md:flex-row gap-4 items-stretch bg-stone-900/40 p-4 rounded-2xl border border-amber-100/[0.08] backdrop-blur-sm shadow-xl">
+    <div className="flex flex-col md:flex-row gap-4 items-stretch bg-[#12151B] p-4 rounded-xl border border-white/[0.08] shadow-[0_12px_32px_rgba(0,0,0,0.6),inset_0_1px_0_rgba(255,255,255,0.06)]">
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 flex-grow">
             {progression.slice(startIndex, startIndex + 4).map((slot, i) => {
                 const globalIndex = startIndex + i;
@@ -294,9 +294,10 @@ const App: React.FC = () => {
         </div>
         
         {/* Row Controls Sidebar */}
-        <div className="flex flex-row md:flex-col justify-center gap-2 min-w-[120px] bg-stone-950/80 p-3 rounded-xl border border-amber-100/[0.08]">
-             <div className="font-mono text-[9px] font-bold text-stone-600 uppercase tracking-[0.2em] text-center mb-0.5">
-                 SECTION {rowId === 1 ? 'A' : 'B'}
+        <div className="flex flex-row md:flex-col justify-center gap-2.5 min-w-[125px] bg-[#090B0F] p-3 rounded-lg border border-white/[0.07] shadow-inner">
+             <div className="flex items-center justify-center gap-1.5 font-mono text-[9px] font-bold text-slate-400 uppercase tracking-[0.2em] text-center mb-0.5">
+                 <span className={`daw-led ${(rowId === 1 && playbackMode === 'ROW1') || (rowId === 2 && playbackMode === 'ROW2') ? 'daw-led-green' : 'daw-led-off'}`} />
+                 <span>BANK {rowId === 1 ? 'A' : 'B'}</span>
              </div>
              
              <button
@@ -304,8 +305,8 @@ const App: React.FC = () => {
                 className={`
                     flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg font-mono text-xs font-bold transition-all border
                     ${(rowId === 1 && playbackMode === 'ROW1') || (rowId === 2 && playbackMode === 'ROW2')
-                        ? 'bg-red-500/20 text-red-400 border-red-500/40 hover:bg-red-500/30' 
-                        : 'bg-stone-900 text-stone-300 border-amber-100/[0.08] hover:border-amber-500/40 hover:text-amber-400 hover:bg-stone-850'
+                        ? 'bg-rose-500/20 text-rose-400 border-rose-500/40 hover:bg-rose-500/30 shadow-[0_0_12px_rgba(244,63,94,0.3)]' 
+                        : 'bg-[#161B24] text-slate-300 border-white/[0.08] hover:border-cyan-400/40 hover:text-cyan-300 hover:bg-[#1E2430]'
                     }
                 `}
              >
@@ -318,7 +319,7 @@ const App: React.FC = () => {
 
              <button
                 onClick={() => exportMidi(startIndex, 4, `row-${rowId}.mid`)}
-                className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-stone-900 hover:bg-stone-800 text-stone-400 hover:text-amber-400 rounded-lg border border-amber-100/[0.08] transition-all font-mono text-[11px] font-semibold"
+                className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-[#161B24] hover:bg-[#1E2430] text-slate-400 hover:text-cyan-300 rounded-lg border border-white/[0.08] hover:border-cyan-400/40 transition-all font-mono text-[11px] font-semibold"
              >
                 <Download size={12} />
                 MIDI
@@ -328,51 +329,53 @@ const App: React.FC = () => {
   );
 
   return (
-    <div className="min-h-screen bg-[#070709] text-stone-100 flex flex-col items-center py-8 px-4 font-sans selection:bg-amber-500 selection:text-black">
+    <div className="min-h-screen bg-[#0A0C10] text-slate-100 flex flex-col items-center py-8 px-4 font-sans selection:bg-cyan-500/30 selection:text-cyan-200">
       
       {/* Header */}
-      <header className="w-full max-w-6xl mb-8 flex flex-col md:flex-row justify-between items-center gap-6 pb-6 border-b border-amber-100/[0.08]">
-        <div className="flex-1 text-center md:text-left">
-          <div className="inline-flex items-center gap-1.5 mb-3">
-            <span className="font-mono text-[9px] font-bold text-stone-500 uppercase tracking-[0.2em]">trustnodelogic.com</span>
-            <ChevronRight size={9} className="text-stone-600" />
-            <span className="font-mono text-[9px] font-bold text-amber-500/80 uppercase tracking-[0.2em]">chordcreate</span>
+      <header className="w-full max-w-6xl mb-8 flex flex-col lg:flex-row justify-between items-center gap-6 pb-6 border-b border-white/[0.08]">
+        <div className="flex-1 text-center lg:text-left">
+          <div className="inline-flex items-center gap-2 mb-3 px-2.5 py-1 rounded bg-[#12151B] border border-white/[0.07] shadow-inner">
+            <span className="daw-led daw-led-active" />
+            <span className="font-mono text-[9px] font-bold text-slate-400 uppercase tracking-[0.2em]">trustnodelogic.com</span>
+            <ChevronRight size={10} className="text-slate-600" />
+            <span className="font-mono text-[9px] font-bold text-cyan-400 uppercase tracking-[0.2em]">chordcreate</span>
           </div>
-          <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-amber-400 via-amber-300 to-stone-300">
-            ChordFlow
+          <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-white flex items-center justify-center lg:justify-start gap-3">
+            <span>ChordFlow</span>
+            <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 tracking-widest uppercase">HDX ENGINE</span>
           </h1>
-          <p className="text-stone-500 text-[11px] font-mono mt-1.5 tracking-wider">
-            8-step chord sequencer &nbsp;·&nbsp; voice leading &nbsp;·&nbsp; MIDI export
+          <p className="text-slate-400 text-[11px] font-mono mt-1.5 tracking-wider">
+            8-step chord sequencer &nbsp;·&nbsp; voice leading visualizer &nbsp;·&nbsp; MIDI export
           </p>
         </div>
 
-        {/* Global Controls */}
-        <div className="flex flex-wrap items-center justify-center gap-3 bg-stone-900/80 p-3 rounded-2xl border border-amber-100/[0.08] shadow-2xl backdrop-blur-md">
+        {/* Global Controls / Master Transport Bar */}
+        <div className="flex flex-wrap items-center justify-center gap-2.5 bg-[#12151B] p-2.5 rounded-xl border border-white/[0.08] shadow-[0_16px_36px_-12px_rgba(0,0,0,0.8),inset_0_1px_0_rgba(255,255,255,0.06)]">
              {/* Vibe & Progression Selector */}
-             <div className="flex items-center gap-2">
+             <div className="flex items-center gap-1.5">
                <div className="relative">
                  <select
                    value={selectedProgressionId ? `preset:${selectedProgressionId}` : (selectedVibeId ? `vibe:${selectedVibeId}` : '')}
                    onChange={(e) => handleVibeSelect(e.target.value)}
-                   className="appearance-none bg-stone-950 text-stone-200 border border-amber-100/[0.08] hover:border-amber-500/40 rounded-lg py-2 pl-8 pr-7 text-xs font-mono font-semibold focus:outline-none focus:ring-1 focus:ring-amber-500 cursor-pointer transition-colors max-w-[220px] sm:max-w-none truncate"
+                   className="appearance-none bg-[#090B0F] text-slate-200 border border-white/[0.09] hover:border-cyan-400/40 rounded-lg py-2 pl-8 pr-7 text-xs font-mono font-semibold focus:outline-none focus:ring-1 focus:ring-cyan-500 cursor-pointer transition-colors max-w-[220px] sm:max-w-none truncate shadow-inner"
                    title="Select a harmonic vibe or progression"
                  >
                    <option value="" disabled>GENRE / MOOD</option>
                    {VIBE_GROUPS.map(vibe => (
-                     <optgroup key={vibe.id} label={`${vibe.icon} ${vibe.name}`} className="bg-stone-900 text-amber-400 font-bold">
-                       <option value={`vibe:${vibe.id}`} className="bg-stone-900 text-stone-100 font-semibold">
+                     <optgroup key={vibe.id} label={`${vibe.icon} ${vibe.name}`} className="bg-[#12151B] text-cyan-400 font-bold">
+                       <option value={`vibe:${vibe.id}`} className="bg-[#12151B] text-slate-100 font-semibold">
                          {vibe.icon} All {vibe.name} (Cycle 1-{vibe.progressions.length})
                        </option>
                        {vibe.progressions.map((p, idx) => (
-                         <option key={p.id} value={`preset:${p.id}`} className="bg-stone-950 text-stone-300 font-normal">
+                         <option key={p.id} value={`preset:${p.id}`} className="bg-[#090B0F] text-slate-300 font-normal">
                            &nbsp;&nbsp;{idx + 1}. {p.name}
                          </option>
                        ))}
                      </optgroup>
                    ))}
                  </select>
-                 <Music2 size={13} className="absolute left-2.5 top-2.5 text-amber-500 pointer-events-none" />
-                 <div className="absolute right-2.5 top-3 pointer-events-none text-stone-500">
+                 <Music2 size={13} className="absolute left-2.5 top-2.5 text-cyan-400 pointer-events-none" />
+                 <div className="absolute right-2.5 top-3 pointer-events-none text-slate-500">
                    <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
                    </svg>
@@ -380,79 +383,78 @@ const App: React.FC = () => {
                </div>
                <button
                  onClick={randomizeVibeProgression}
-                 className="p-2 rounded-lg bg-stone-950 hover:bg-stone-850 text-stone-400 hover:text-amber-400 border border-amber-100/[0.08] hover:border-amber-500/40 transition-all flex items-center justify-center"
+                 className="p-2 rounded-lg bg-[#090B0F] hover:bg-[#161B24] text-slate-400 hover:text-cyan-300 border border-white/[0.09] hover:border-cyan-400/40 transition-all flex items-center justify-center shadow-inner"
                  title={activeVibeGroup ? `Cycle next chord progression in "${activeVibeGroup.name}" (${activeProgressionIndex + 1}/${activeVibeGroup.progressions.length})` : "Cycle vibe chord progression"}
                >
                  <Shuffle size={14} />
                </button>
              </div>
 
-
-             <div className="w-[1px] h-6 bg-amber-100/[0.08] hidden md:block"></div>
+             <div className="w-[1px] h-6 bg-white/[0.08] hidden md:block"></div>
 
              {/* Synth Tone Preset Selector */}
              <div className="relative">
                <select
                  value={selectedToneId}
                  onChange={(e) => handleToneChange(e.target.value as SynthToneId)}
-                 className="appearance-none bg-stone-950 text-stone-200 border border-amber-100/[0.08] hover:border-amber-500/40 rounded-lg py-2 pl-8 pr-7 text-xs font-mono font-semibold focus:outline-none focus:ring-1 focus:ring-amber-500 cursor-pointer transition-colors"
+                 className="appearance-none bg-[#090B0F] text-slate-200 border border-white/[0.09] hover:border-cyan-400/40 rounded-lg py-2 pl-8 pr-7 text-xs font-mono font-semibold focus:outline-none focus:ring-1 focus:ring-cyan-500 cursor-pointer transition-colors shadow-inner"
                  title="Select synth sound model"
                >
                  {SYNTH_TONE_OPTIONS.map(t => (
-                   <option key={t.id} value={t.id} className="bg-stone-900 text-stone-200">
+                   <option key={t.id} value={t.id} className="bg-[#12151B] text-slate-200">
                      🎹 {t.name}
                    </option>
                  ))}
                </select>
-               <SlidersHorizontal size={13} className="absolute left-2.5 top-2.5 text-amber-500 pointer-events-none" />
-               <div className="absolute right-2.5 top-3 pointer-events-none text-stone-500">
+               <SlidersHorizontal size={13} className="absolute left-2.5 top-2.5 text-cyan-400 pointer-events-none" />
+               <div className="absolute right-2.5 top-3 pointer-events-none text-slate-500">
                  <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
                  </svg>
                </div>
              </div>
 
-             <div className="w-[1px] h-6 bg-amber-100/[0.08] hidden md:block"></div>
+             <div className="w-[1px] h-6 bg-white/[0.08] hidden md:block"></div>
 
              <button
                 onClick={() => exportMidi(0, 8, 'full-progression.mid')}
-                className="flex items-center gap-2 px-4 py-2 bg-stone-950 hover:bg-stone-850 text-stone-200 rounded-lg border border-amber-100/[0.08] hover:border-amber-500/40 transition-all font-mono text-xs font-semibold shadow-sm"
+                className="flex items-center gap-2 px-3.5 py-2 bg-[#090B0F] hover:bg-[#161B24] text-slate-200 rounded-lg border border-white/[0.09] hover:border-cyan-400/40 transition-all font-mono text-xs font-semibold shadow-inner"
              >
-                <Download size={14} className="text-amber-500" />
+                <Download size={14} className="text-cyan-400" />
                 EXPORT MIDI
              </button>
 
-            <div className="w-[1px] h-6 bg-amber-100/[0.08] hidden md:block"></div>
+            <div className="w-[1px] h-6 bg-white/[0.08] hidden md:block"></div>
 
-            <div className="flex items-center gap-3 px-1">
-                <span className="text-[10px] font-mono font-bold text-stone-400 uppercase tracking-widest">BPM</span>
+            <div className="flex items-center gap-2.5 px-2 py-1 bg-[#090B0F] rounded-lg border border-white/[0.08] shadow-inner">
+                <span className="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-widest pl-0.5">BPM</span>
                 <input 
                     type="range" 
                     min="60" 
                     max="160" 
                     value={bpm} 
                     onChange={(e) => setBpm(Number(e.target.value))}
-                    className="w-24 accent-amber-500 h-1 bg-stone-800 rounded-lg appearance-none cursor-pointer"
+                    className="w-20 cursor-pointer"
                 />
-                <span className="text-xs font-mono font-bold text-amber-400 w-8">{bpm}</span>
+                <span className="text-xs font-mono font-bold text-cyan-300 w-7 text-right tabular-nums">{bpm}</span>
             </div>
 
-            <div className="w-[1px] h-6 bg-amber-100/[0.08] hidden md:block"></div>
+            <div className="w-[1px] h-6 bg-white/[0.08] hidden md:block"></div>
 
             <button
                 onClick={() => togglePlayback('ALL')}
                 className={`
-                    flex items-center gap-2 px-5 py-2 rounded-lg font-mono text-xs font-bold transition-all shadow-lg min-w-[110px] justify-center border
+                    flex items-center gap-2 px-4 py-2 rounded-lg font-mono text-xs font-bold transition-all min-w-[110px] justify-center border
                     ${playbackMode === 'ALL'
-                        ? 'bg-red-500/20 text-red-400 border-red-500/40 shadow-red-500/10' 
-                        : 'bg-amber-500 text-stone-950 border-amber-400 shadow-amber-500/20 hover:bg-amber-400'
+                        ? 'bg-rose-500/20 text-rose-400 border-rose-500/50 shadow-[0_0_16px_rgba(244,63,94,0.35)] hover:bg-rose-500/30' 
+                        : 'bg-emerald-500 text-slate-950 border-emerald-400 shadow-[0_0_16px_rgba(16,185,129,0.35)] hover:bg-emerald-400 hover:shadow-[0_0_20px_rgba(16,185,129,0.5)]'
                     }
                 `}
             >
                 {playbackMode === 'ALL' ? (
-                    <><Square size={14} fill="currentColor" /> STOP ALL</>
+                    <><Square size={13} fill="currentColor" /> STOP ALL</>
                 ) : (
-                    <><Play size={14} fill="currentColor" /> PLAY ALL</>
+                    <><Play size={13} fill="currentColor" /> PLAY ALL</>
                 )}
             </button>
         </div>
@@ -470,16 +472,17 @@ const App: React.FC = () => {
 
       {/* Master Keyboard Visualizer */}
       <div className="w-full max-w-6xl mb-8">
-        <div className="bg-stone-900/40 border border-amber-100/[0.08] rounded-2xl p-5 shadow-2xl backdrop-blur-sm">
-            <div className="flex justify-between items-center mb-4">
-                <div className="flex items-center gap-2">
-                    <Music2 size={15} className="text-amber-500" />
-                    <h3 className="text-xs font-mono font-bold text-stone-300 uppercase tracking-wider">Piano</h3>
+        <div className="bg-[#12151B] border border-white/[0.08] rounded-xl p-5 shadow-[0_16px_36px_-12px_rgba(0,0,0,0.8),inset_0_1px_0_rgba(255,255,255,0.06)]">
+            <div className="flex justify-between items-center mb-4 pb-3 border-b border-white/[0.06]">
+                <div className="flex items-center gap-2.5">
+                    <span className="daw-led daw-led-active" />
+                    <Music2 size={15} className="text-cyan-400" />
+                    <h3 className="text-xs font-mono font-bold text-slate-200 uppercase tracking-[0.2em]">MASTER KEYBED MONITOR</h3>
                 </div>
-                <div className="font-mono text-[10px] text-stone-500">
+                <div className="font-mono text-[10px] text-slate-400 bg-[#090B0F] px-2.5 py-1 rounded border border-white/[0.06]">
                     {playingIndex !== null 
-                        ? `${progression[playingIndex]}  ·  slot ${playingIndex + 1}` 
-                        : 'click a slot or key to preview'}
+                        ? <span className="text-cyan-400 font-semibold">{progression[playingIndex].chord} &nbsp;·&nbsp; SLOT {String(playingIndex + 1).padStart(2, '0')}</span> 
+                        : 'CLICK A SLOT OR KEY TO AUDITION'}
                 </div>
             </div>
             
@@ -492,14 +495,14 @@ const App: React.FC = () => {
       </div>
 
       {/* Footer */}
-      <footer className="mt-auto py-6 text-stone-400 text-xs font-mono border-t border-amber-100/[0.08] w-full max-w-6xl text-center flex flex-col sm:flex-row justify-between items-center gap-4">
+      <footer className="mt-auto py-6 text-slate-500 text-xs font-mono border-t border-white/[0.08] w-full max-w-6xl text-center flex flex-col sm:flex-row justify-between items-center gap-4">
         <div>
-          © 2026 <a href="https://trustnodelogic.com" target="_blank" rel="noopener noreferrer" className="text-stone-300 hover:text-amber-400 transition-colors">Trust Node Logic</a> · Justin Ray (JRAY / loserdub)
+          © 2026 <a href="https://trustnodelogic.com" target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-cyan-400 transition-colors">Trust Node Logic</a> · Justin Ray (JRAY / loserdub)
         </div>
         <div className="flex items-center gap-4">
-          <a href="https://trustnodelogic.com" target="_blank" rel="noopener noreferrer" className="text-stone-400 hover:text-amber-400 transition-colors">trustnodelogic.com</a>
+          <a href="https://trustnodelogic.com" target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-cyan-400 transition-colors">trustnodelogic.com</a>
           <span>·</span>
-          <a href="https://www.reddit.com/r/hybridproduction/" target="_blank" rel="noopener noreferrer" className="text-stone-400 hover:text-amber-400 transition-colors">r/hybridproduction</a>
+          <a href="https://www.reddit.com/r/hybridproduction/" target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-cyan-400 transition-colors">r/hybridproduction</a>
         </div>
       </footer>
 
